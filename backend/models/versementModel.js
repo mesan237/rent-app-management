@@ -1,15 +1,22 @@
 import mongoose from "mongoose";
 import { logMiddleware } from "../middleware/logMiddleware.js";
 
-const depenseSchema = mongoose.Schema({
+const versementSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  designation: { type: String, required: true },
+  montants: [
+    {
+      type: { type: String, required: true }, // Type of amount, e.g., 'payment', 'fee', etc.
+      value: { type: Number, required: true },
+      locataire: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Locataire",
+      },
+    },
+  ],
   date: { type: Date, required: true, default: Date.now },
-  batiment: { type: String, enum: ["A", "B"], required: true },
-  categorie: { type: String, required: true },
-  montant: { type: Number, required: true },
   comments: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date },
@@ -17,7 +24,7 @@ const depenseSchema = mongoose.Schema({
 });
 
 // Middleware to log actions
-depenseSchema.pre("save", async function (next) {
+versementSchema.pre("save", async function (next) {
   if (this.isNew) {
     // If a new record is being created
     this.user = this.user; // Replace with the actual user ID or username
@@ -37,7 +44,7 @@ depenseSchema.pre("save", async function (next) {
   next();
 });
 
-depenseSchema.pre("remove", async function (next) {
+versementSchema.pre("remove", async function (next) {
   // If a document is being deleted
   this.deletedBy = this.deletedBy; // Replace with the actual user ID or username
   this.deletedAt = new Date();
@@ -46,5 +53,5 @@ depenseSchema.pre("remove", async function (next) {
   await logMiddleware(this.deletedBy, "delete", this._id);
   next();
 });
-const Depense = mongoose.model("Depense", depenseSchema);
-export default Depense;
+const Versement = mongoose.model("Versement", versementSchema);
+export default Versement;

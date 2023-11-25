@@ -2,8 +2,13 @@ import Locataire from "../models/locataireModel.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
 const getLocataires = asyncHandler(async (req, res) => {
-  const listesLocataires = await Locataire.find({});
-  res.json(listesLocataires);
+  try {
+    const listesLocataires = await Locataire.find({});
+    res.json(listesLocataires);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 });
 
 const createLocataires = asyncHandler(async (req, res) => {
@@ -93,15 +98,15 @@ const getLocataireById = asyncHandler(async (req, res) => {
 
 // modifier les donnees d'un locataire
 const updateLocataires = asyncHandler(async (req, res) => {
-  const { num, name, tel, date, comments, months } = req.body;
+  const { num, name, tel, date, comments, montant } = req.body;
 
   // find the locataire
   const locataire = await Locataire.findById(req.params.id);
   if (locataire) {
     locataire.num = num;
+    locataire.montant = montant;
     locataire.name = name;
     locataire.tel = tel;
-    locataire.months = months;
     locataire.date = date;
     locataire.comments = comments;
 

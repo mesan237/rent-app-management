@@ -2,24 +2,34 @@ export const listesLocataires = [
   {
     num: "1A",
     name: "Daphne",
-    tel: "659177264",
+    tel: "672316567",
     date: "10-12-2023",
     months: "12",
     debts: 120000,
+    montant: 120000,
     comments: "Il reste un mois pour terminer le contrat ",
   },
   {
+    num: "2A",
+    name: "Jupita et prince",
+    tel: "652273354",
+    date: "9/7/2022",
+    months: "8",
+    debts: 80000,
+    comments: "En attente de paiement depuis deux semaines.",
+  },
+  {
     num: "2B",
-    name: "Elijah",
+    name: "Jupita et prince",
     tel: "657822109",
-    date: "09-15-2023",
+    date: "9/19/2023",
     months: "8",
     debts: 80000,
     comments: "En attente de paiement depuis deux semaines.",
   },
   {
     num: "3C",
-    name: "Gabrielle",
+    name: "Olivier",
     tel: "653310245",
     date: "11-03-2023",
     months: "6",
@@ -359,5 +369,28 @@ export const listesDepenses = [
     categorie: "materiel",
     montant: 19000,
     comments: "Achat de matériel pour le bâtiment B.",
+  },
+];
+
+export const logs = [
+  {
+    user: "user123",
+    action: "create",
+    timestamp: new Date("2023-01-01T12:00:00Z"),
+  },
+  {
+    user: "user123",
+    action: "update",
+    timestamp: new Date("2023-01-02T14:30:00Z"),
+  },
+  {
+    user: "user123",
+    action: "create",
+    timestamp: new Date("2023-01-03T09:45:00Z"),
+  },
+  {
+    user: "user123",
+    action: "create",
+    timestamp: new Date("2023-01-04T11:20:00Z"),
   },
 ];

@@ -1,0 +1,12 @@
+@import url("https://fonts.googleapis.com/css2?family=Monoton&family=Quicksand:wght@500;700&display=swap");
+
+h1 {
+  font-family: "Monoton" !important;
+  font-size: 1.5rem;
+  width: 100px;
+  text-transform: uppercase;
+  font-weight: 400;
+  word-spacing: 10px;
+  letter-spacing: 1px;
+  color: #29d0b1;
+}
