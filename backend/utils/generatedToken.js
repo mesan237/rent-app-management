@@ -4,7 +4,7 @@ const generateToken = (res, userId) => {
   const token = jwt.sign({ user: userId }, process.env.SECRET_KEY, {
     expiresIn: "30d",
   });
-
+  // console.log("user id", userId);
   res.cookie("jwt", token, {
     httpOnly: true,
     sameSite: "strict",

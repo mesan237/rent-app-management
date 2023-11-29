@@ -14,6 +14,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { chambres } from "../../utils/constants";
 import { DatePicker } from "@mui/x-date-pickers";
 
+import { useForm, Controller } from "react-hook-form";
+
 function AddUser(props) {
   const [open, setOpen] = React.useState(false);
 
@@ -23,32 +25,28 @@ function AddUser(props) {
   const handleClose = () => {
     setOpen(false);
   };
-  const handleSelectch = (e) => {
-    setNum(e.target.value);
-  };
+
   const handleEdit = (e) => {
-    e.preventDefault();
-    const createTenant = {
-      name,
-      tel,
-      date: selectedDate,
-      montant,
-      num,
-      comments,
-    };
+    // e.preventDefault();
+    const formData = getValues();
+    // console.log("Form Data:", formData);
+    const createTenant = { ...formData };
     console.log(createTenant);
+
     props.onhandleSubmit(createTenant);
     setOpen(false);
   };
 
-  const [name, setName] = React.useState("");
-  const [tel, setTel] = React.useState("");
-  const [selectedDate, setSelectedDate] = React.useState(
-    dayjs("2022-04-17T15:30")
-  );
-  const [montant, setMontant] = React.useState(0);
-  const [num, setNum] = React.useState("");
-  const [comments, setComments] = React.useState("");
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm();
+
+  const onSubmit = (data) => {
+    handleEdit(data);
+  };
 
   return (
     <React.Fragment>
@@ -56,75 +54,136 @@ function AddUser(props) {
         Ajouter un locataire
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <form onSubmit={handleEdit}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle>Ajouter un locataire</DialogTitle>
           <DialogContent>
-            <TextField
-              autoFocus
-              margin="normal"
-              id="nom"
-              onChange={(e) => setName(e.target.value)}
-              label="nom"
-              type="text"
-              fullWidth
-              variant="standard"
+            <Controller
+              name="name"
+              control={control}
+              defaultValue=""
+              rules={{ required: "Le nom est requis" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  error={!!errors.name}
+                  helperText={errors.name && errors.name.message}
+                  autoFocus
+                  margin="normal"
+                  id="name"
+                  label="name"
+                  type="text"
+                  fullWidth
+                  // onChange={(e) => setName(e.target.value)}
+                  variant="standard"
+                />
+              )}
             />
-            <TextField
-              autoFocus
-              margin="normal"
-              id="montant"
-              onChange={(e) => setMontant(e.target.value)}
-              label="Montant"
-              type="number"
-              fullWidth
-              variant="standard"
+            <Controller
+              name="montant"
+              control={control}
+              defaultValue=""
+              rules={{ required: "Le montant est necessaire" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  error={!!errors.montant}
+                  helperText={errors.montant && errors.montant.message}
+                  autoFocus
+                  margin="normal"
+                  id="montant"
+                  // onChange={(e) => setMontant(e.target.value)}
+                  label="Montant"
+                  type="number"
+                  fullWidth
+                  variant="standard"
+                />
+              )}
             />
-            <TextField
-              autoFocus
-              margin="normal"
-              id="Tel"
-              onChange={(e) => setTel(e.target.value)}
-              label="Tel"
-              type="number"
-              fullWidth
-              variant="standard"
+            <Controller
+              name="tel"
+              control={control}
+              defaultValue=""
+              rules={{ required: "Le numero de telephone est nécessaire" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  error={!!errors.tel}
+                  helperText={errors.tel && errors.tel.message}
+                  autoFocus
+                  margin="normal"
+                  id="tel"
+                  // onChange={(e) => setTel(e.target.value)}
+                  label="Tel"
+                  type="number"
+                  fullWidth
+                  variant="standard"
+                />
+              )}
             />
 
-            <TextField
-              id="outlined-select-currency"
-              select
-              label="N° chambre"
-              onChange={handleSelectch}
-              margin="normal"
+            <Controller
+              name="num"
+              control={control}
               defaultValue="1A"
-              // helperText="Please select the room"
-            >
-              {chambres.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DemoContainer
-                components={["DateTimePicker"]}
-                defaultValue={dayjs("2022-04-17T15:30")}
-              >
-                <DatePicker
-                  label="Date d'entrée"
-                  value={selectedDate}
-                  onChange={(newDate) => setSelectedDate(newDate)}
+              rules={{ required: "N° chambre is required" }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  error={!!errors.num}
+                  helperText={errors.num && errors.num.message}
+                  id="outlined-numero-chambre"
+                  select
+                  label="N° chambre"
+                  margin="normal"
+                  defaultValue="1A"
+                >
+                  {chambres.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+            <Controller
+              name="date"
+              control={control}
+              defaultValue={dayjs(Date.now())}
+              rules={{ required: "Date d'entrée est necessaire" }}
+              render={({ field }) => (
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DemoContainer
+                    components={["DatePicker"]}
+                    // defaultValue={dayjs("2022-04-17T15:30")}
+                  >
+                    <DatePicker
+                      {...field}
+                      label="Date d'entrée"
+                      fullWidth
+                      // value={selectedDate}
+                      // onChange={(newDate) => setSelectedDate(newDate)}
+                    />
+                  </DemoContainer>
+                </LocalizationProvider>
+              )}
+            />
+            <Controller
+              name="comments"
+              control={control}
+              defaultValue=""
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  error={!!errors.comments}
+                  helperText={errors.comments && errors.comments.message}
+                  id="outlined-multiline-flexible"
+                  label="Commentaire"
+                  fullWidth
+                  multiline
+                  margin="normal"
+                  maxRows={4}
                 />
-              </DemoContainer>
-            </LocalizationProvider>
-            <TextField
-              id="outlined-multiline-flexible"
-              label="Commentaire"
-              fullWidth
-              onChange={(e) => setComments(e.target.value)}
-              multiline
-              margin="normal"
-              maxRows={4}
+              )}
             />
           </DialogContent>
           <DialogActions>

@@ -1,5 +1,10 @@
 import * as React from "react";
-import { styled, useTheme } from "@mui/material/styles";
+import {
+  ThemeProvider,
+  createTheme,
+  styled,
+  useTheme,
+} from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
@@ -23,8 +28,22 @@ import PropTypes from "prop-types";
 import { Link as RouterLink, MemoryRouter } from "react-router-dom";
 import Link from "@mui/material/Link";
 import { useState } from "react";
+import { blue, teal } from "@mui/material/colors";
 
 const drawerWidth = 240;
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#00bfa5",
+      // contrastText: "#E9DB5D",
+    },
+    secondary: {
+      main: "#1de9b6",
+      // contrastText: "#242105",
+    },
+  },
+});
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -92,7 +111,6 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 export default function Sidebar() {
-  const theme = useTheme();
   const open = true;
   const [selectedCategory, setSelectedCategory] = useState("Dashboard");
 
@@ -101,96 +119,125 @@ export default function Sidebar() {
   }
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-around" }}>
-      {/*content */}
-      <CssBaseline />
-      <AppBar position="fixed" open={open}>
-        <Header />
-      </AppBar>
-      <Drawer
-        variant="permanent"
-        open={open}
-        PaperProps={{
-          sx: {
-            backgroundColor: "#009688",
-            color: "#fff",
-            fontWeight: "bold",
-            borderRight: "0",
-          },
+    <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          display: "flex",
+          // flexDirection: "column",
+          justifyContent: "space-around",
         }}
       >
-        <DrawerHeader>
-          <Typography
-            variant="h1"
-            noWrap
-            component="div"
-            sx={{
-              fontFamily: "Monoton !important",
-              fontSize: "1.5rem",
-              textTransform: "uppercase",
-              fontWeight: "500",
-              wordSpacing: "10px",
-              letterSpacing: "1px",
-            }}
-          >
-            cite Mockpa
-          </Typography>
-          <Divider />
-          {/* <IconButton onClick={handleDrawerClose}>
+        {/*content */}
+        {/* <CssBaseline /> */}
+        <AppBar
+          open={open}
+          sx={{
+            backgroundColor: "#fff",
+            boxShadow: 0,
+            color: teal[600],
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Header />
+        </AppBar>
+        <Drawer
+          variant="permanent"
+          open={open}
+          PaperProps={{
+            sx: {
+              backgroundColor: "#fff",
+              color: "#000",
+              fontWeight: "bold",
+              borderRight: "1px solid #fff",
+              px: 2.5,
+            },
+          }}
+        >
+          <DrawerHeader>
+            {/* <Typography
+              variant="h1"
+              noWrap
+              component="div"
+              sx={{
+                fontFamily: "Monoton !important",
+                fontSize: "1.5rem",
+                textTransform: "uppercase",
+                fontWeight: "500",
+                wordSpacing: "10px",
+                letterSpacing: "1px",
+              }}
+            >
+              cite Mockpa
+            </Typography> */}
+            <Divider />
+            {/* <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
             ) : (
               <ChevronLeftIcon />
             )}
           </IconButton> */}
-        </DrawerHeader>
-        {/* <Divider /> */}
-        <List>
-          {categories.map((category) => (
-            <ListItem
-              className={` ${
-                selectedCategory === category.name && "selected-category"
-              }`}
-              key={category.name}
-              disablePadding
-              sx={{ display: "block" }}
-            >
-              <ListItemButton
-                onClick={() => handleActiveButton(category.name)}
-                component={RouterLink}
-                to={category.link}
+          </DrawerHeader>
+          {/* <Divider /> */}
+          <List>
+            {categories.map((category) => (
+              <ListItem
+                className={` ${
+                  selectedCategory === category.name && "selected-category"
+                }`}
+                key={category.name}
+                disablePadding
+                // {selectedCategory === category.name && sx={{...selectCategory}}}
                 sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                  py: 1.6,
-                  my: 2,
+                  display: "block",
+                  fontWeight: "bold",
+                  borderRadius: "10px",
+                  backgroundColor:
+                    selectedCategory === category.name ? "primary.main" : null,
+                  color: selectedCategory === category.name ? "white" : null,
+                  transition: "transform 0.5s ease-in-out",
                 }}
               >
-                <ListItemIcon
+                <ListItemButton
+                  onClick={() => handleActiveButton(category.name)}
+                  component={RouterLink}
+                  to={category.link}
                   sx={{
-                    minWidth: 0,
-                    mr: open ? 3 : "auto",
-                    justifyContent: "center",
-                    color:
-                      selectedCategory === category.name ? "#009688" : "#fff",
+                    minHeight: 48,
+                    justifyContent: open ? "initial" : "center",
+                    px: 2.5,
+                    py: 1.6,
+                    // my: 2,
                   }}
                 >
-                  {category.icon}
-                </ListItemIcon>
-                <ListItemText
-                  primary={category.name}
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
-          ))}
-        </List>
-      </Drawer>
-      <Box component="main" sx={{ flexGrow: 1 }}>
-        <DrawerHeader />
-        <Outlet />
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: open ? 3 : "auto",
+                      justifyContent: "center",
+                      color:
+                        selectedCategory === category.name ? "#fff" : "#000",
+                      // #009688
+                    }}
+                  >
+                    {category.icon}
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={category.name}
+                    sx={{ opacity: open ? 1 : 0 }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </Drawer>
+        <Box component="main" sx={{ flexGrow: 1 }}>
+          <DrawerHeader />
+          <Outlet />
+        </Box>
       </Box>
-    </Box>
+    </ThemeProvider>
   );
 }

@@ -73,7 +73,7 @@ function LoginForm() {
 
   const { search } = useLocation();
   const sp = new URLSearchParams(search);
-  const redirect = sp.get("redirect") || "/";
+  const redirect = sp.get("redirect") || "/dashboard";
 
   useEffect(() => {
     if (userInfo) {
@@ -94,81 +94,87 @@ function LoginForm() {
   };
 
   return (
-    <form
-      sx={{ position: "relative", height: "100vh" }}
-      onSubmit={submitHandler}
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        height: "100vh",
+        justifyContent: "center",
+      }}
     >
-      <Box
+      <form
         sx={{
-          display: "flex",
-          // flexDirection: { xs: "row", sm: "column" },
-          padding: "1rem",
-          width: "35%",
           position: "relative",
-          top: 0,
-          right: 0,
-          left: 0,
-          bottom: 0,
-          margin: "auto",
-          flexDirection: "column",
-          gap: 2,
         }}
+        onSubmit={submitHandler}
       >
-        <Typography sx={{ fontSize: "3rem", fontWeight: "bold" }}>
-          MOCKPA CITY
-        </Typography>
-        <Typography sx={{ fontSize: "2rem", fontWeight: "bold" }}>
-          Login
-        </Typography>
-        <Box>
-          <FormHelperText id="outlined-weight-helper-text">
-            Email
-          </FormHelperText>
-          <Input
-            id="outlined-start-adornment"
-            value={values.email}
-            onChange={handleChange("email")}
-            aria-label="montant"
-            type="email"
-            name="email"
-          />
-        </Box>
-        <Box>
-          <FormHelperText id="outlined-weight-helper-text">
-            Mot de passe
-          </FormHelperText>
-          <Input
-            id="outlined-adornment-password"
-            type={values.showPassword ? "text" : "password"}
-            value={values.password}
-            onChange={handleChange("password")}
-            endAdornment={
-              <InputAdornment>
-                <IconButton
-                  size="small"
-                  aria-label="toggle password visibility"
-                  // onClick={handleClickShowPassword}
-                  onMouseDown={handleMouseDownPassword}
-                >
-                  {values.showPassword ? (
-                    <VisibilityOff fontSize="small" />
-                  ) : (
-                    <Visibility fontSize="small" />
-                  )}
-                </IconButton>
-              </InputAdornment>
-            }
-          />
-        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            // flexDirection: { xs: "row", sm: "column" },
+            padding: "1rem",
+            width: "25rem",
 
-        <Box>
-          <StyledButton type="submit" disabled={isLoading}>
-            Se connecter
-          </StyledButton>
+            flexDirection: "column",
+            gap: 2,
+          }}
+        >
+          <Typography sx={{ fontSize: "3rem", fontWeight: "bold" }}>
+            MOCKPA CITY
+          </Typography>
+          <Typography sx={{ fontSize: "2rem", fontWeight: "bold" }}>
+            Login
+          </Typography>
+          <Box>
+            <FormHelperText id="outlined-weight-helper-text">
+              Email
+            </FormHelperText>
+            <Input
+              id="outlined-start-adornment"
+              value={values.email}
+              onChange={handleChange("email")}
+              aria-label="montant"
+              type="email"
+              name="email"
+            />
+          </Box>
+          <Box>
+            <FormHelperText id="outlined-weight-helper-text">
+              Mot de passe
+            </FormHelperText>
+            <Input
+              id="outlined-adornment-password"
+              type={values.showPassword ? "text" : "password"}
+              value={values.password}
+              onChange={handleChange("password")}
+              endAdornment={
+                <InputAdornment>
+                  <IconButton
+                    size="small"
+                    aria-label="toggle password visibility"
+                    // onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                  >
+                    {values.showPassword ? (
+                      <VisibilityOff fontSize="small" />
+                    ) : (
+                      <Visibility fontSize="small" />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              }
+            />
+          </Box>
+
+          <Box>
+            <StyledButton type="submit" disabled={isLoading}>
+              Se connecter
+            </StyledButton>
+          </Box>
+          {isLoading && <CircularProgress />}
         </Box>
-        {isLoading && <CircularProgress />}
-      </Box>
-    </form>
+      </form>
+    </Box>
   );
 }
 

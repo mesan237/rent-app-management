@@ -9,7 +9,7 @@ const connection =
   "mongodb+srv://negokamgaing:<password>@app-rent-mern.hzderzk.mongodb.net/?retryWrites=true&w=majority";
 
 const categories = [
-  { name: "Dashboard", icon: <GridViewOutlined />, link: "/" },
+  { name: "Dashboard", icon: <GridViewOutlined />, link: "/dashboard" },
   { name: "Locataires", icon: <PersonAddAlt1Rounded />, link: "/locataires" },
   { name: "Versement", icon: <AccountBalanceRounded />, link: "/versement" },
   { name: "Depenses", icon: <PaymentsRounded />, link: "/depenses" },

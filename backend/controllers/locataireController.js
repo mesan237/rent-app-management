@@ -2,13 +2,8 @@ import Locataire from "../models/locataireModel.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
 const getLocataires = asyncHandler(async (req, res) => {
-  try {
-    const listesLocataires = await Locataire.find({});
-    res.json(listesLocataires);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
+  const listesLocataires = await Locataire.find({});
+  res.json(listesLocataires);
 });
 
 const createLocataires = asyncHandler(async (req, res) => {
@@ -49,18 +44,6 @@ const createLocataires = asyncHandler(async (req, res) => {
       });
     }
   }
-
-  /*const locataire = new Locataire({
-    num: "15A",
-    user: req.user._id,
-    name: "nego",
-    tel: "651234567",
-    date: "08-20-2020",
-    montant: 120000,
-    comments: "Besoin d'une extension de délai pour le paiement.",
-  });*/
-
-  //find if he exists
 });
 
 const deleteLocataires = asyncHandler(async (req, res) => {

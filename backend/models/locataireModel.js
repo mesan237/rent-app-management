@@ -30,7 +30,7 @@ const locataireSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  num: { type: String, enum: chambres, default: "1A" },
+  num: { type: String, enum: chambres, required: true },
   name: { type: String, required: true },
   tel: { type: Number, required: true },
   date: { type: Date, required: true, default: Date.now },
@@ -50,7 +50,7 @@ locataireSchema.pre("validate", async function (next) {
   this.months = getMonthDifference(this.date, new Date());
   const annee = Math.floor(this.months % 12);
   const rentAmount =
-    this.num[1] === "A" ? 15000 : this.num[1] === "B" ? 12000 : 25000;
+    this?.num[1] === "A" ? 15000 : this?.num[1] === "B" ? 12000 : 25000;
 
   if (this.montant !== undefined && this.months !== undefined) {
     this.debts = this.montant - (this.months - 2 * annee) * rentAmount;
@@ -75,7 +75,12 @@ locataireSchema.pre("save", async function (next) {
     return acc;
   }, {});
   // console.log(changes);
-  await logMiddleware(this.user, "update", this._id, changes);
+  await logMiddleware(
+    this.user,
+    this.isNew ? "create" : "update",
+    this._id,
+    changes
+  );
   next();
 });
 

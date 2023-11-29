@@ -78,13 +78,14 @@ const ListeChambres = () => {
   const createLocataireHandler = async (locataire) => {
     try {
       const result = await createLocataire(locataire);
+      console.log(result);
       if (result) {
         // console.log("okay");
         setOpen(true);
         refetch();
       } else {
         setOpen(false);
-        console.log(result.error);
+        // console.log(result.error);
       }
     } catch (error) {
       console.log(error, "huge error");
@@ -100,7 +101,6 @@ const ListeChambres = () => {
 
     setOpen(false);
   };
-  console.log(useGetLocatairesQuery());
 
   // Create a copy of the array with modifications
   const rows = !listLocataires
@@ -128,70 +128,58 @@ const ListeChambres = () => {
   return (
     <Box sx={{ width: 0.92, mx: "auto" }}>
       {createLoading && <CircularProgress />}
-      {isLoading ? (
+      {/* {isLoading ? (
         <h2 style={{ display: "flex" }}>
           <CircularProgress />
         </h2>
       ) : error ? (
         <div>{error?.data.message || error.error}</div>
-      ) : (
-        <div className="lists">
-          {/* <Button onClick={createLocataireHandler}>Annuler</Button> */}
+      ) : ( */}
+      <div className="lists">
+        {/* <Button onClick={createLocataireHandler}>Annuler</Button> */}
 
-          <AddUser onhandleSubmit={createLocataireHandler} />
-          <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-            <Alert
-              onClose={handleClose}
-              severity="success"
-              sx={{ width: "100%" }}
-            >
-              This is a success message!
-            </Alert>
-          </Snackbar>
-          <Box sx={{ height: 400 }}>
-            <DataGrid
-              rowHeight={55}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 8,
-                  },
+        <AddUser onhandleSubmit={createLocataireHandler} />
+        <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+          <Alert
+            onClose={handleClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            This is a success message!
+          </Alert>
+        </Snackbar>
+        <Box sx={{ height: 400 }}>
+          <DataGrid
+            rowHeight={55}
+            initialState={{
+              pagination: {
+                paginationModel: {
+                  pageSize: 8,
                 },
-              }}
-              autoHeight
-              pageSizeOptions={[8]}
-              columns={columns}
-              loading={isLoading}
-              rows={!isLoading ? rows : []}
-              rowSelection={true}
-              disableColumnFilter
-              disableDensitySelector
-              slots={{ toolbar: GridToolbar }}
-              filterModel={filterModel}
-              onFilterModelChange={(newModel) => setFilterModel(newModel)}
-              slotProps={{ toolbar: { showQuickFilter: true } }}
-              columnVisibilityModel={columnVisibilityModel}
-              onColumnVisibilityModelChange={(newModel) =>
-                setColumnVisibilityModel(newModel)
-              }
-            />
-          </Box>
-        </div>
-      )}
+              },
+            }}
+            autoHeight
+            pageSizeOptions={[8]}
+            columns={columns}
+            loading={isLoading}
+            rows={!isLoading ? rows : []}
+            rowSelection={true}
+            disableColumnFilter
+            disableDensitySelector
+            slots={{ toolbar: GridToolbar }}
+            filterModel={filterModel}
+            onFilterModelChange={(newModel) => setFilterModel(newModel)}
+            slotProps={{ toolbar: { showQuickFilter: true } }}
+            columnVisibilityModel={columnVisibilityModel}
+            onColumnVisibilityModelChange={(newModel) =>
+              setColumnVisibilityModel(newModel)
+            }
+          />
+        </Box>
+      </div>
+      {/* )} */}
     </Box>
   );
 };
-/*
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 700,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};*/
 
 export default ListeChambres;

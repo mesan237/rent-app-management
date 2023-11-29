@@ -6,6 +6,7 @@ import {
   GridPagination,
   useGridApiContext,
   useGridSelector,
+  GridActionsCellItem,
 } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
 import {
@@ -13,31 +14,61 @@ import {
   useGetDepensesQuery,
 } from "../slices/depensesApiSlice.js";
 import CircularProgress from "@mui/material/CircularProgress";
-import { blue, green, grey, red } from "@mui/material/colors";
+import { blue, green, grey, red, pink, teal } from "@mui/material/colors";
 
-import { GridActionsCellItem } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import AddExpenses from "../components/Forms/FormExpense/AddExpenses.jsx";
 import EditExpenses from "../components/Forms/FormExpense/EditExpenses.jsx";
-import { pink } from "@mui/material/colors";
 import MuiPagination from "@mui/material/Pagination";
 import Avatar from "@mui/material/Avatar";
+
+// import EditIcon from "@mui/icons-material/Edit";
+
+import { GridToolbar } from "@mui/x-data-grid";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
+
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: "#00bfa5",
+      contrastText: "#fff",
+    },
+    // palette: {
+    //   teal: {
+    //     prem: "#64ffda",
+    //     sec: "#1de9b6",
+    //     ter: "#00bfa5",
+    //     main: "#E3D026",
+    //     light: "#E9DB5D",
+    //     dark: "#A29415",
+    //     contrastText: "#242105",
+    //   },
+  },
+});
 
 function Pagination({ page, onPageChange, className }) {
   const apiRef = useGridApiContext();
   const pageCount = useGridSelector(apiRef, gridPageCountSelector);
 
   return (
-    <MuiPagination
-      color="primary"
-      className={className}
-      count={pageCount}
-      page={page + 1}
-      onChange={(event, newPage) => {
-        onPageChange(event, newPage - 1);
-      }}
-    />
+    <ThemeProvider theme={theme}>
+      <MuiPagination
+        color="primary"
+        shape="rounded"
+        className={className}
+        variant="outlined"
+        count={pageCount}
+        page={page + 1}
+        onChange={(event, newPage) => {
+          onPageChange(event, newPage - 1);
+        }}
+        sx={{ color: teal["A700"] }}
+      />
+    </ThemeProvider>
   );
 }
 
@@ -134,7 +165,7 @@ const Depenses = () => {
   };
   console.log(useGetDepensesQuery());
   // Create a copy of the array with modifications
-  const rows = isLoading
+  const rows = !listDepenses
     ? []
     : listDepenses.map((depense) => {
         // Create a copy of the object using the spread operator
@@ -153,6 +184,17 @@ const Depenses = () => {
     };
   }, []);
 
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+  const [filterModel, setFilterModel] = React.useState({
+    items: [],
+    // quickFilterExcludeHiddenColumns: true,
+    quickFilterValues: ["1"],
+  });
+
+  const [columnVisibilityModel, setColumnVisibilityModel] = React.useState({});
+
   return (
     <>
       {/* <ThemeProvider theme={theme}> */}
@@ -164,9 +206,20 @@ const Depenses = () => {
       ) : error ? (
         <div>{error?.data.message || error.error}</div>
       ) : ( */}
-      <div className="lists">
-        <AddExpenses onhandleSubmit={createExpenseHandler} />
-        <Box sx={{ width: 0.95, mx: "auto", height: "80vh" }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          width: 0.95,
+          mx: "auto",
+          gap: 1,
+        }}
+      >
+        <AddExpenses
+          sx={{ width: "100px" }}
+          onhandleSubmit={createExpenseHandler}
+        />
+        <Box sx={{ height: "80vh" }}>
           <DataGrid
             rowHeight={60}
             loading={isLoading}
@@ -179,12 +232,19 @@ const Depenses = () => {
                 },
               },
             }}
-            rowSelection={true}
-            pagination
-            slots={{
-              pagination: CustomPagination,
-            }}
             pageSizeOptions={[10]}
+            rowSelection={true}
+            disableColumnFilter
+            disableDensitySelector
+            slots={{ toolbar: GridToolbar, pagination: CustomPagination }}
+            filterModel={filterModel}
+            onFilterModelChange={(newModel) => setFilterModel(newModel)}
+            slotProps={{ toolbar: { showQuickFilter: true } }}
+            columnVisibilityModel={columnVisibilityModel}
+            onColumnVisibilityModelChange={(newModel) =>
+              setColumnVisibilityModel(newModel)
+            }
+            pagination
             getRowSpacing={getRowSpacing}
             sx={{
               border: 0,
@@ -192,8 +252,7 @@ const Depenses = () => {
                 // bgcolor: (theme) =>
 
                 // theme.palette.mode === "light" ? blue[200] : blue[900],
-                borderInlineStart:
-                  "8px solid hsl(209.09deg 57.89% 88.82% NNNNNNNNNNNNNNNNNNNNNNNN)",
+                // borderInlineStart: "8px solid hsl(209.09deg 57.89% 88.82%)",
                 // borderRadius: "9px",
                 // background: "hsl(209.09deg 57.89% 88.82%)",
                 // #43e6e5
@@ -201,7 +260,7 @@ const Depenses = () => {
                 width: 0.98,
               },
               "& .super-app-theme--header": {
-                backgroundColor: "hsl(211.67deg 29.03% 51.37%)",
+                backgroundColor: teal["A700"],
                 // background:
                 // "linear-gradient(to right, #002f61, #00507b, #006e8e, #008b98, #00a79c)",
                 // background:
@@ -213,7 +272,7 @@ const Depenses = () => {
             }}
           />
         </Box>
-      </div>
+      </Box>
       {/* )} */}
       {/* </ThemeProvider> */}
     </>

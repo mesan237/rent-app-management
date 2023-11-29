@@ -9,12 +9,13 @@ const protect = asyncHandler(async (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.SECRET_KEY);
       req.user = await User.findById(decoded.user).select("-password");
-      // console.log("try", decoded.userId);
+      // console.log("try", decoded.user); // Corrected from decoded.userId
+      // console.log(decoded);
       next();
     } catch (error) {
       console.log(error);
       res.status(401);
-      throw new Error("unauthorized token");
+      throw new Error("Unauthorized token");
     }
   } else {
     res.status(401);
@@ -24,7 +25,7 @@ const protect = asyncHandler(async (req, res, next) => {
 
 // function to protect routes
 const admin = (req, res, next) => {
-  console.log(req.user);
+  // console.log(req.user);
   if (req.user && req.user.isAdmin) {
     next();
   } else {

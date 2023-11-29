@@ -13,11 +13,15 @@ const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
   // background: "linear-gradient(1.15turn, #03b99f, #82fcea)",
   ...theme.typography.body2,
-  padding: theme.spacing(1),
+  padding: theme.spacing(2),
   textAlign: "left",
   color: theme.palette.text.secondary,
   // color: "white",
   height: "150px",
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "flex-start",
+  gap: 15,
   // boxShadow: 3,
   boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.1)",
   borderRadius: "15px",
@@ -35,16 +39,17 @@ const iconStyle = {
 };
 
 const nameCardStyle = {
-  display: "flex",
-  alignItems: "center",
-  gap: "12px",
+  // display: "flex",
+  alignItems: "flex-start",
+  // gap: "12px",
   fontSize: "0.85rem",
 };
 
 const percentageStyle = {
   color: "#29d0b1",
-  padding: "2px",
-  backgroundColor: "white",
+  padding: "2px 8px",
+
+  backgroundColor: "rgb(210, 212, 210 , 0.4)",
   height: "25px",
   width: "50px",
   borderRadius: "15px",
@@ -59,7 +64,7 @@ const data = [
 ];
 
 const size = {
-  width: 500,
+  // width: 500,
   height: 370,
 };
 const valueFormatter = (value) => `${value} FCFA`;
@@ -87,7 +92,7 @@ const Dashboard = () => {
     <Box
       sx={{
         flexGrow: 1,
-        padding: "1.5rem",
+        padding: ".5rem",
       }}
     >
       <Grid
@@ -105,12 +110,14 @@ const Dashboard = () => {
               <GiReceiveMoney
                 style={{ ...iconStyle, backgroundColor: "#29d0b1" }}
               />
-              <div style={{ fontSize: "0.85rem" }}>Total Entrees</div>
             </div>
-            <div style={{ margin: "5px auto" }}>190.000 FCFA</div>
-            <div style={{ fontSize: "0.85rem" }}>
-              <span style={percentageStyle}>+12%</span> de plus que le mois
-              dernier
+            <div style={{ alignSelf: "center" }}>
+              <div style={{ fontSize: "0.85rem" }}>Total Entrees</div>
+              <div style={{ margin: "5px auto" }}>190.000 FCFA</div>
+              <div style={{ fontSize: "0.85rem" }}>
+                <span style={percentageStyle}>+12%</span> de plus que le mois
+                dernier
+              </div>
             </div>
           </Item>
         </Grid>
@@ -118,12 +125,14 @@ const Dashboard = () => {
           <Item>
             <div style={nameCardStyle}>
               <BsCash style={{ ...iconStyle, backgroundColor: "#b800d8" }} />
-              <div style={{ fontSize: "0.85rem" }}>Total Depenses</div>
             </div>
-            <div style={{ margin: "5px auto" }}>100.000 FCFA</div>
-            <div style={{ fontSize: "0.85rem" }}>
-              <span style={percentageStyle}>-13%</span> de plus que le mois
-              dernier
+            <div style={{ alignSelf: "center" }}>
+              <div style={{ fontSize: "0.85rem" }}>Total Depenses</div>
+              <div style={{ margin: "5px auto" }}>100.000 FCFA</div>
+              <div style={{ fontSize: "0.85rem" }}>
+                <span style={percentageStyle}>-13%</span> de plus que le mois
+                dernier
+              </div>
             </div>
           </Item>
         </Grid>
@@ -133,13 +142,16 @@ const Dashboard = () => {
               <TbDoorEnter
                 style={{ ...iconStyle, backgroundColor: "#2e96ff" }}
               />
+            </div>
+            <div style={{ alignSelf: "center" }}>
               <div style={{ fontSize: "0.85rem" }}>Total Locataires</div>
-            </div>
-            <div style={{ margin: "5px auto" }}>
-              Batiment A <span>13</span>
-            </div>
-            <div>
-              Batiment B <span>7</span>
+              <div style={{ margin: "5px auto" }}>
+                Batiment A: <span>13</span> - B: <span>7</span>
+              </div>
+              <div style={{ fontSize: "0.85rem" }}>
+                <span style={percentageStyle}>+12%</span> de plus que le mois
+                dernier
+              </div>
             </div>
           </Item>
         </Grid>
@@ -149,11 +161,13 @@ const Dashboard = () => {
               <GiTakeMyMoney
                 style={{ ...iconStyle, backgroundColor: "#25283b" }}
               />
-              <div>Total impayés</div>
             </div>
-            <div style={{ margin: "5px auto" }}>40.000 FCFA</div>
-            <div style={{ fontSize: "0.85rem" }}>
-              <span style={percentageStyle}>+1%</span> de reduction des dettes
+            <div style={{ alignSelf: "center" }}>
+              <div>Total impayés</div>
+              <div style={{ margin: "5px auto" }}>40.000 FCFA</div>
+              <div style={{ fontSize: "0.85rem" }}>
+                <span style={percentageStyle}>+1%</span> de reduction des dettes
+              </div>
             </div>
           </Item>
         </Grid>
@@ -167,14 +181,23 @@ const Dashboard = () => {
       >
         <Box
           sx={{
-            boxShadow: 3,
+            // boxShadow: 3,
             borderRadius: 3,
             p: 2,
             flex: 1,
             backgroundColor: "white",
+            alignSelf: "flex-end",
+            boxShadow:
+              "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.1)",
           }}
         >
           <LineChart
+            margin={{
+              left: 80,
+              right: 70,
+              top: 30,
+              bottom: 80,
+            }}
             // dataset={dataset}
             xAxis={[{ scaleType: "band", data: xLabels }]}
             series={[
@@ -191,14 +214,25 @@ const Dashboard = () => {
         </Box>
         <Box
           sx={{
-            boxShadow: 3,
+            boxShadow:
+              "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.1)",
+            // boxShadow: 3,
             borderRadius: 3,
             p: 2,
             flex: 1,
             backgroundColor: "white",
+            // width: "400",
           }}
         >
           <PieChart
+            margin={{ top: 100, bottom: 100, left: -110, right: 100 }}
+            slotProps={{
+              legend: {
+                direction: "column",
+                position: { vertical: "middle", horizontal: "right" },
+                padding: 90,
+              },
+            }}
             series={[
               {
                 data: [...data],
@@ -209,8 +243,14 @@ const Dashboard = () => {
                 cornerRadius: 7,
                 startAngle: -180,
                 endAngle: 180,
-                cx: 100,
-                cy: 150,
+                highlightScope: { faded: "global", highlighted: "item" },
+                faded: {
+                  innerRadius: 10,
+                  additionalRadius: -10,
+                  color: "gray",
+                },
+                // cx: 100,
+                // cy: 150,
               },
             ]}
             sx={{

@@ -13,6 +13,7 @@ const authUser = asyncHandler(async (req, res) => {
   if (user && (await user.passwordChecking(password))) {
     generateToken(res, user._id);
 
+    // console.log(res.get("Set-Cookie"));
     res.json({
       _id: user._id,
       email: user.email,
@@ -56,6 +57,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route POST api/users/logout
 // Aaccess Private
 const logoutUser = asyncHandler(async (req, res) => {
+  // console.log(req.cookies.jwt);
   res.cookie("jwt", "", {
     httpOnly: true,
     expiresIn: Date.now(0),
