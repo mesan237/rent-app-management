@@ -14,9 +14,9 @@ const versementSchema = mongoose.Schema({
         required: true,
         ref: "Locataire",
       },
+      dateVersement: { type: Date, required: true, default: Date.now },
     },
   ],
-  date: { type: Date, required: true, default: Date.now },
   comments: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date },
@@ -25,6 +25,7 @@ const versementSchema = mongoose.Schema({
 
 // Middleware to log actions
 versementSchema.pre("save", async function (next) {
+  console.log("save");
   if (this.isNew) {
     // If a new record is being created
     this.user = this.user; // Replace with the actual user ID or username
@@ -39,8 +40,13 @@ versementSchema.pre("save", async function (next) {
     acc[path] = this[path];
     return acc;
   }, {});
-  // console.log(changes);
-  await logMiddleware(this.user, "update", this._id, changes);
+  await logMiddleware(
+    this.user,
+    this.isNew ? "create" : "update",
+    this.montants.locataire,
+    "versement",
+    changes
+  );
   next();
 });
 
@@ -50,7 +56,7 @@ versementSchema.pre("remove", async function (next) {
   this.deletedAt = new Date();
 
   // Log the delete action
-  await logMiddleware(this.deletedBy, "delete", this._id);
+  await logMiddleware(this.deletedBy, "delete versement", this._id);
   next();
 });
 const Versement = mongoose.model("Versement", versementSchema);

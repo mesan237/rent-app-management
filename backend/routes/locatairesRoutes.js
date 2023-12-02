@@ -6,10 +6,15 @@ import {
   updateLocataires,
   getLocataireById,
   deleteLocataires,
+  updateFieldsForAllTenants,
 } from "../controllers/locataireController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
-router.route("/").get(protect, getLocataires).post(protect, createLocataires);
+router
+  .route("/")
+  .get(protect, getLocataires)
+  .post(protect, createLocataires)
+  .put(protect, updateFieldsForAllTenants);
 router
   .route("/:id")
   .get(protect, getLocataireById)

@@ -48,12 +48,12 @@ locataireSchema.pre("validate", async function (next) {
     next();
   }
   this.months = getMonthDifference(this.date, new Date());
-  const annee = Math.floor(this.months % 12);
+  const annee = Math.floor(this.months / 12);
   const rentAmount =
     this?.num[1] === "A" ? 15000 : this?.num[1] === "B" ? 12000 : 25000;
 
   if (this.montant !== undefined && this.months !== undefined) {
-    this.debts = this.montant - (this.months - 2 * annee) * rentAmount;
+    this.debts = this.montant - (this.months - 2) * annee * rentAmount;
     this.debts = this.debts > 0 ? 0 : this.debts;
   }
 });
@@ -79,6 +79,7 @@ locataireSchema.pre("save", async function (next) {
     this.user,
     this.isNew ? "create" : "update",
     this._id,
+    "locataire",
     changes
   );
   next();

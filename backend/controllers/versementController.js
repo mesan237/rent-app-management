@@ -1,9 +1,51 @@
 import Versement from "../models/versementModel.js";
 import asyncHandler from "../middleware/asyncHandler.js";
+import Locataire from "../models/locataireModel.js";
+import User from "../models/userModel.js";
 
-const getVersements = asyncHandler(async (req, res) => {
+const getVersements = asyncHandler(async (req, res, next) => {
   const listeVersements = await Versement.find({});
-  res.json(listeVersements);
+  // res.json(listeVersements);
+  req.versement = listeVersements;
+  next();
+});
+
+const getDetailsVersements = asyncHandler(async (req, res, next) => {
+  const listVersements = req.versement;
+  const updatedVersements = [];
+
+  for (const versement of listVersements) {
+    try {
+      const montants = versement.montants;
+      const amount = [];
+      const userDetails = await User.findById(versement.user);
+
+      for (const amt of montants) {
+        const locataireDetails = await Locataire.findById(amt.locataire);
+        amount.push({
+          nameLocataire: locataireDetails.name,
+          versement: amt.value,
+          date: amt.dateVersement,
+        });
+      }
+
+      updatedVersements.push({
+        comments: versement.comments,
+        user: userDetails.name,
+        nbrVersement: versement.montants.length,
+        totalAmount: amount.reduce((sum, item) => sum + item.versement, 0),
+        historique: amount,
+      });
+    } catch (error) {
+      console.error(`Error processing log ${versement._id}: ${error.message}`);
+      updatedVersements.push({
+        versementId: versement._id,
+        error: true,
+        errorMessage: error.message,
+      });
+    }
+  }
+  res.json(updatedVersements);
 });
 
 const createVersements = asyncHandler(async (req, res) => {
@@ -107,4 +149,5 @@ export {
   deleteVersements,
   updateVersement,
   getVersementById,
+  getDetailsVersements,
 };

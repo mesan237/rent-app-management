@@ -30,6 +30,7 @@ import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { Typography } from "@mui/material";
 
 const theme = createTheme({
   palette: {
@@ -37,16 +38,6 @@ const theme = createTheme({
       main: "#00bfa5",
       contrastText: "#fff",
     },
-    // palette: {
-    //   teal: {
-    //     prem: "#64ffda",
-    //     sec: "#1de9b6",
-    //     ter: "#00bfa5",
-    //     main: "#E3D026",
-    //     light: "#E9DB5D",
-    //     dark: "#A29415",
-    //     contrastText: "#242105",
-    //   },
   },
 });
 
@@ -215,13 +206,15 @@ const Depenses = () => {
           gap: 1,
         }}
       >
-        <AddExpenses
-          sx={{ width: "100px" }}
-          onhandleSubmit={createExpenseHandler}
-        />
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography sx={{ fontWeight: "bold", fontSize: "1.7rem" }}>
+            Liste des dépenses
+          </Typography>
+          <AddExpenses onhandleSubmit={createExpenseHandler} />
+        </Box>
         <Box sx={{ height: "80vh" }}>
           <DataGrid
-            rowHeight={60}
+            rowHeight={55}
             loading={isLoading}
             rows={!isLoading ? rows : []}
             columns={columns}
@@ -256,7 +249,7 @@ const Depenses = () => {
                 // borderRadius: "9px",
                 // background: "hsl(209.09deg 57.89% 88.82%)",
                 // #43e6e5
-                boxShadow: 2,
+                boxShadow: 1,
                 width: 0.98,
               },
               "& .super-app-theme--header": {
@@ -278,17 +271,4 @@ const Depenses = () => {
     </>
   );
 };
-/*
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 700,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};*/
-
 export default Depenses;

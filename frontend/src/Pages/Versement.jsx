@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
@@ -13,29 +13,15 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 
-function createData(name, calories, fat, carbs, protein, price) {
-  return {
-    name,
-    calories,
-    fat,
-    carbs,
-    protein,
-    price,
-    history: [
-      {
-        date: "2020-01-05",
-        customerId: "11091700",
-        amount: 3,
-      },
-      {
-        date: "2020-01-02",
-        customerId: "Anonymous",
-        amount: 1,
-      },
-    ],
-  };
-}
+import {
+  useGetVersementsQuery,
+  useUpdateVersementMutation,
+} from "../slices/versementSlices";
+import { Avatar, CircularProgress } from "@mui/material";
+import { blue, pink } from "@mui/material/colors";
 
 function Row(props) {
   const { row } = props;
@@ -54,40 +40,56 @@ function Row(props) {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {row.name}
+          {row.historique[0].nameLocataire}
         </TableCell>
-        <TableCell align="right">{row.calories}</TableCell>
-        <TableCell align="right">{row.fat}</TableCell>
-        <TableCell align="right">{row.carbs}</TableCell>
-        <TableCell align="right">{row.protein}</TableCell>
+        <TableCell align="right">{row.nbrVersement}</TableCell>
+        <TableCell align="right">{row.totalAmount}</TableCell>
+        <TableCell align="right">{row.comments}</TableCell>
+        <TableCell align="right" sx={{ display: "flex", gap: 1.5 }}>
+          <Avatar
+            onClick={() => console.log("for delete purpose")}
+            variant="rounded"
+            sx={{ bgcolor: "#fce4e4" }}
+          >
+            <DeleteIcon sx={{ color: pink[500] }} />
+          </Avatar>
+
+          <Avatar
+            onClick={() => console.log("for delete purpose")}
+            variant="rounded"
+            sx={{ bgcolor: blue[100] }}
+          >
+            <EditIcon sx={{ color: blue[500] }} />
+          </Avatar>
+        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Typography variant="h6" gutterBottom component="div">
-                History
+                Historique
               </Typography>
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Customer</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell align="right">Total price ($)</TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>
+                      Date du versement
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold" }}>Montant</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.history.map((historyRow) => (
-                    <TableRow key={historyRow.date}>
-                      <TableCell component="th" scope="row">
-                        {historyRow.date}
+                  {row.historique.map((historyRow, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell align="left">
+                        {new Date(historyRow.date).getUTCDate()}{" "}
+                        {new Intl.DateTimeFormat("en-US", {
+                          month: "short",
+                        }).format(new Date(historyRow.date))}{" "}
+                        {new Date(historyRow.date).getUTCFullYear()}
                       </TableCell>
-                      <TableCell>{historyRow.customerId}</TableCell>
-                      <TableCell align="right">{historyRow.amount}</TableCell>
-                      <TableCell align="right">
-                        {Math.round(historyRow.amount * row.price * 100) / 100}
-                      </TableCell>
+                      <TableCell align="left">{historyRow.versement}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -102,50 +104,72 @@ function Row(props) {
 
 Row.propTypes = {
   row: PropTypes.shape({
-    calories: PropTypes.number.isRequired,
-    carbs: PropTypes.number.isRequired,
-    fat: PropTypes.number.isRequired,
-    history: PropTypes.arrayOf(
+    user: PropTypes.string.isRequired,
+    comments: PropTypes.string.isRequired,
+    nbrVersement: PropTypes.number.isRequired,
+    totalAmount: PropTypes.number.isRequired,
+    historique: PropTypes.arrayOf(
       PropTypes.shape({
-        amount: PropTypes.number.isRequired,
-        customerId: PropTypes.string.isRequired,
         date: PropTypes.string.isRequired,
+        versement: PropTypes.number.isRequired,
       })
     ).isRequired,
-    name: PropTypes.string.isRequired,
-    price: PropTypes.number.isRequired,
-    protein: PropTypes.number.isRequired,
   }).isRequired,
 };
 
-const rows = [
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0, 3.99),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3, 4.99),
-  createData("Eclair", 262, 16.0, 24, 6.0, 3.79),
-  createData("Cupcake", 305, 3.7, 67, 4.3, 2.5),
-  createData("Gingerbread", 356, 16.0, 49, 3.9, 1.5),
-];
-
 export default function Versement() {
+  const {
+    data: listVersements,
+    isLoading,
+    error,
+    refetch,
+  } = useGetVersementsQuery();
+  console.log("liste versements", listVersements);
+
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell>Dessert (100g serving)</TableCell>
-            <TableCell align="right">Calories</TableCell>
-            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Protein&nbsp;(g)</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <Row key={row.name} row={row} />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <Box
+      sx={{
+        width: 0.8,
+        display: "flex",
+        flexDirection: "column",
+        mx: "auto",
+        gap: 4,
+      }}
+    >
+      <Typography sx={{ fontWeight: "bold", fontSize: "1.8rem" }}>
+        Versements
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table aria-label="collapsible table">
+          <TableHead>
+            <TableRow>
+              <TableCell />
+              <TableCell sx={{ fontWeight: "bold" }}>
+                Profile locataire
+              </TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                Nobre de versements
+              </TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                Montant total
+              </TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                Commentaire
+              </TableCell>
+              <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                Actions
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {!listVersements ? (
+              <CircularProgress />
+            ) : (
+              listVersements.map((row, index) => <Row key={index} row={row} />)
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 }

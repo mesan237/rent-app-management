@@ -2,15 +2,17 @@ import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
-// import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+import cron from "node-cron";
 import connectDB from "./config/db.js";
+
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 import locatairesRoutes from "./routes/locatairesRoutes.js";
 import depensesRoutes from "./routes/depensesRoutes.js";
 import usersRoutes from "./routes/userRoutes.js";
 import logsRoutes from "./routes/logsRoutes.js";
 import versementsRoutes from "./routes/versementsRoutes.js";
-import cookieParser from "cookie-parser";
+import { updateFieldsForAllTenants } from "./controllers/locataireController.js";
 
 const port = process.env.PORT || 5000;
 connectDB();
@@ -31,6 +33,11 @@ app.use("/api/depenses", depensesRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/logs", logsRoutes);
 app.use("/api/versement", versementsRoutes);
+
+cron.schedule("0 0 28 * *", () => {
+  console.log("Running updateLocataires function...");
+  updateFieldsForAllTenants();
+});
 
 app.use(notFound);
 app.use(errorHandler);

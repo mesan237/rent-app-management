@@ -10,3 +10,7 @@ h1 {
   letter-spacing: 1px;
   color: #29d0b1;
 }
+#root {
+  height: 100%;
+  width: 100%;
+}

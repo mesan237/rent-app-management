@@ -12,6 +12,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import { Typography } from "@mui/material";
 
 function AddExpenses(props) {
   const [open, setOpen] = React.useState(false);
@@ -49,7 +50,11 @@ function AddExpenses(props) {
 
   return (
     <React.Fragment>
-      <Button variant="outlined" onClick={handleClickOpen}>
+      <Button
+        variant="contained"
+        onClick={handleClickOpen}
+        sx={{ width: "fit-content" }}
+      >
         Ajouter une depense
       </Button>
       <Dialog open={open} onClose={handleClose}>

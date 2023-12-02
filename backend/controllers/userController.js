@@ -125,7 +125,14 @@ const getUsers = asyncHandler(async (req, res) => {
 // @route PUT api/users/profile
 // Aaccess Public
 const getUserById = asyncHandler(async (req, res) => {
-  res.json("get user by Id");
+  const user = await User.findById(req.params.id);
+  // console.log(req.params.id);
+  if (user) {
+    res.json(user);
+  } else {
+    res.status(400);
+    throw new Error("Utilisateur pas trouvé");
+  }
 });
 // @desc update user profile
 // @route PUT api/users/profile

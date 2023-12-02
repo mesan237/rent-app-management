@@ -19,5 +19,5 @@ body {
   /* text-align: center; */
   /* background-color: #f0f1f3; */
   background-color: hsl(177, 41%, 98%);
-  min-height: 100%;
+  height: 100%;
 }

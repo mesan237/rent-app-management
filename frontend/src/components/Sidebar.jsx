@@ -112,7 +112,14 @@ const Drawer = styled(MuiDrawer, {
 
 export default function Sidebar() {
   const open = true;
-  const [selectedCategory, setSelectedCategory] = useState("Dashboard");
+  const [selectedCategory, setSelectedCategory] = useState(
+    localStorage.getItem("selectedCategory") || "Dashboard"
+  );
+
+  React.useEffect(() => {
+    // Save the active link to localStorage whenever it changes
+    localStorage.setItem("selectedCategory", selectedCategory);
+  }, [selectedCategory]);
 
   function handleActiveButton(categoryName) {
     setSelectedCategory(categoryName);

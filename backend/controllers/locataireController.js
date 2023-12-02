@@ -100,6 +100,67 @@ const updateLocataires = asyncHandler(async (req, res) => {
     throw new Error("Locataire not found for a possible update");
   }
 });
+function getMonthDifference(startDate, endDate) {
+  const startYear = startDate.getFullYear();
+  const startMonth = startDate.getMonth();
+
+  const endYear = endDate.getFullYear();
+  const endMonth = endDate.getMonth();
+
+  return (endYear - startYear) * 12 + (endMonth - startMonth);
+}
+
+const updateFieldsForAllTenants = asyncHandler(async (req, res) => {
+  const listesLocataires = await Locataire.find({});
+  const dates = [];
+  const updateLocataires = async () => {
+    const updatePromises = listesLocataires.map(async (locataire) => {
+      const dateEntry = new Date(locataire.date);
+      const totalAmount = locataire.montant;
+      const monthDifference = getMonthDifference(
+        dateEntry,
+        new Date(Date.now())
+      );
+      const annee = Math.floor(monthDifference / 12);
+
+      const filter = { _id: locataire._id };
+
+      const rentAmount =
+        locataire.num[1] === "A"
+          ? 15000
+          : locataire.num[1] === "B"
+          ? 12000
+          : 25000;
+
+      const newDebts = totalAmount - (monthDifference - 2) * annee * rentAmount;
+      const updateFields = {
+        $set: {
+          months: monthDifference,
+          debts: newDebts,
+        },
+      };
+
+      const result = await Locataire.updateOne(filter, updateFields);
+      dates.push({
+        months: monthDifference,
+        debts: newDebts,
+        totalAmount: totalAmount,
+        result: result, // Store the result of the update
+      });
+
+      return result; // Return the result to be used by Promise.all
+    });
+
+    // Wait for all update promises to resolve
+    const updateResults = await Promise.all(updatePromises);
+
+    // Output the dates array if needed
+    console.log(dates);
+    // res.json(dates);
+  };
+
+  updateLocataires();
+});
 
 export {
   getLocataires,
@@ -107,4 +168,5 @@ export {
   deleteLocataires,
   updateLocataires,
   getLocataireById,
+  updateFieldsForAllTenants,
 };

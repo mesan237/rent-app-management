@@ -371,26 +371,101 @@ export const listesDepenses = [
     comments: "Achat de matériel pour le bâtiment B.",
   },
 ];
-
 export const logs = [
   {
-    user: "user123",
-    action: "create",
-    timestamp: new Date("2023-01-01T12:00:00Z"),
+    user: "5fcda8b2ab71f3a1d2e4c4b9",
+    action: "update",
+    categorie: "locataire",
+    recordId: "5fcda8b2ab71f3a1d2e4c4c1",
+    changes: { name: "John Doe", phone: "555-1234" },
+    timestamp: new Date("2022-01-02T14:30:00Z"),
   },
   {
-    user: "user123",
-    action: "update",
+    user: "5fcda8b2ab71f3a1d2e4c4b9",
+    action: "create",
+    categorie: "utilisateur",
+    recordId: "5fcda8b2ab71f3a1d2e4c4c2",
+    changes: { name: "newuser", role: "admin" },
+    timestamp: new Date("2023-06-02T14:30:00Z"),
+  },
+  {
+    user: "5fcda8b2ab71f3a1d2e4c4b9",
+    action: "delete",
+    categorie: "locataire",
+    recordId: "5fcda8b2ab71f3a1d2e4c4c3",
+    changes: { montant: 10000, date: "2023-1-01" },
     timestamp: new Date("2023-01-02T14:30:00Z"),
   },
   {
-    user: "user123",
+    user: "5fcda8b2ab71f3a1d2e4c4ba",
     action: "create",
-    timestamp: new Date("2023-01-03T09:45:00Z"),
+    categorie: "versement",
+    recordId: "5fcda8b2ab71f3a1d2e4c4c4",
+    changes: { montant: 500, date: "2023-12-01" },
+    timestamp: new Date("2023-01-01T12:00:00Z"),
+  },
+];
+
+export const sampleVersementData = [
+  {
+    user: "65586f6c9aaf2efe0b5b48ce",
+    updatedBy: "65586f6c9aaf2efe0b5b48ce",
+    deletedBy: null,
+    montants: [
+      {
+        type: "payment",
+        value: 50000,
+        locataire: "65586f6c9aaf2efe0b5b48d3",
+      },
+      {
+        type: "fee",
+        value: 1000,
+        locataire: "65586f6c9aaf2efe0b5b48d3",
+      },
+    ],
+    date: new Date("2023-02-20T10:30:00Z"),
+    comments: "Sample comment 1",
+    createdAt: new Date("2023-01-15T10:30:00Z"),
+    updatedAt: new Date("2023-01-16T08:45:00Z"),
+    deletedAt: null,
   },
   {
-    user: "user123",
-    action: "create",
-    timestamp: new Date("2023-01-04T11:20:00Z"),
+    user: "65586f6c9aaf2efe0b5b48ce",
+    updatedBy: null,
+    deletedBy: null,
+    montants: [
+      {
+        type: "payment",
+        value: 75000,
+        locataire: "65586f6c9aaf2efe0b5b48de",
+      },
+    ],
+    date: new Date("2023-02-20T15:45:00Z"),
+    comments: "Sample comment 2",
+    createdAt: new Date("2023-02-20T15:45:00Z"),
+    updatedAt: new Date("2023-02-21T11:20:00Z"),
+    deletedAt: null,
+  },
+  {
+    user: "65586f6c9aaf2efe0b5b48ce",
+    updatedBy: "65586f6c9aaf2efe0b5b48ce",
+    deletedBy: "65586f6c9aaf2efe0b5b48ce",
+    montants: [
+      {
+        type: "payment",
+        value: 60000,
+        locataire: "65586f6c9aaf2efe0b5b48e2",
+      },
+      {
+        type: "fee",
+        value: 500,
+        locataire: "65586f6c9aaf2efe0b5b48e2",
+      },
+    ],
+    date: new Date("2023-03-28T18:00:00Z"),
+    comments: "Sample comment 3",
+    createdAt: new Date("2023-03-28T18:00:00Z"),
+    updatedAt: new Date("2023-03-29T09:10:00Z"),
+    deletedAt: new Date("2023-03-30T14:30:00Z"),
   },
 ];

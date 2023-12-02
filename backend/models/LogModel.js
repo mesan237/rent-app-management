@@ -2,7 +2,16 @@ import mongoose from "mongoose";
 
 const logSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  action: { type: String, required: true },
+  action: {
+    type: String,
+    enum: ["update", "create", "delete"],
+    required: true,
+  },
+  categorie: {
+    type: String,
+    enum: ["versement", "locataire", "utilisateur", "depense"],
+    required: true,
+  },
   recordId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Locataire",

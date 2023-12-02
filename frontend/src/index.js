@@ -10,7 +10,7 @@ import ErrorPage from "./ErrorPage";
 import ListeChambres from "./components/ListeChambres";
 import Depenses from "./Pages/Depenses";
 import LoginForm from "./components/Forms/LoginForm";
-import Historiques from "./Pages/HistoryLog";
+import Historiques from "./Pages/historiques";
 import Versement from "./Pages/Versement";
 
 const router = createBrowserRouter([

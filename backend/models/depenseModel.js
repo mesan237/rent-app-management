@@ -33,7 +33,13 @@ depenseSchema.pre("save", async function (next) {
     return acc;
   }, {});
   // console.log(changes);
-  await logMiddleware(this.user, "update", this._id, changes);
+  await logMiddleware(
+    this.user,
+    this.isNew ? "create" : "update",
+    this._id,
+    "depense",
+    changes
+  );
   next();
 });
 
