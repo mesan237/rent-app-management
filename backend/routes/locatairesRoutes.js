@@ -19,6 +19,6 @@ router
   .route("/:id")
   .get(protect, getLocataireById)
   .put(protect, updateLocataires)
-  .put(protect, deleteLocataires);
+  .delete(protect, deleteLocataires);
 
 export default router;

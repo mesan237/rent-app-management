@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { logMiddleware } from "../middleware/logMiddleware.js";
+import { userId } from "../controllers/versementController.js";
 
 const versementSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, required: true, ref: "User" },
@@ -25,7 +26,7 @@ const versementSchema = mongoose.Schema({
 
 // Middleware to log actions
 versementSchema.pre("save", async function (next) {
-  console.log("save");
+  console.log("save", this);
   if (this.isNew) {
     // If a new record is being created
     this.user = this.user; // Replace with the actual user ID or username
@@ -35,29 +36,114 @@ versementSchema.pre("save", async function (next) {
     this.updatedAt = new Date();
   }
 
-  // Log the create or update action with changes
-  const changes = this.modifiedPaths().reduce((acc, path) => {
-    acc[path] = this[path];
-    return acc;
-  }, {});
   await logMiddleware(
     this.user,
-    this.isNew ? "create" : "update",
-    this.montants.locataire,
+    "delete",
+    this.montants[0].locataire,
     "versement",
-    changes
+    false,
+    null,
+    null
+  );
+
+  next();
+});
+
+versementSchema.pre("findOneAndUpdate", async function (next) {
+  console.log(this._update["$push"].montants.locataire);
+  if (this._conditions["montants._id"]) {
+    async function getLocataireId(versementId, montantId) {
+      try {
+        const foundVersement = await Versement.findOne(
+          {
+            _id: versementId,
+            "montants._id": montantId,
+          },
+          "montants.$"
+        ).exec();
+
+        if (foundVersement) {
+          const locataireId = foundVersement.montants[0].locataire;
+          // console.log("Locataire ID for the specified montant:", locataireId);
+          return locataireId;
+        } else {
+          console.log("Versement not found.");
+        }
+      } catch (err) {
+        console.error("Error finding versement:", err);
+      }
+    }
+    const locataireId = await getLocataireId(
+      this._conditions._id,
+      this._conditions["montants._id"]
+    );
+
+    await logMiddleware(
+      userId._id,
+      "update",
+      locataireId,
+      "versement",
+      false,
+      null,
+      null
+    );
+  } else {
+    await logMiddleware(
+      userId._id,
+      "create",
+      this._update["$push"].montants.locataire,
+      "versement",
+      false,
+      null,
+      null
+    );
+  }
+
+  // console.log(userId._id, locataireId);
+
+  next();
+});
+
+// Middleware to log actions
+versementSchema.pre("UpdateOne", async function (next) {
+  console.log("deletion");
+  async function getLocataireId(versementId, montantId) {
+    try {
+      const foundVersement = await Versement.findOne(
+        {
+          _id: versementId,
+          "montants._id": montantId,
+        },
+        "montants.$"
+      ).exec();
+
+      if (foundVersement) {
+        const locataireId = foundVersement.montants[0].locataire;
+        // console.log("Locataire ID for the specified montant:", locataireId);
+        return locataireId;
+      } else {
+        console.log(foundVersement, "Versement notttt found.");
+      }
+    } catch (err) {
+      console.error("Error finding versement:", err);
+    }
+  }
+  const locataireId = await getLocataireId(
+    this._conditions._id,
+    this._conditions["montants._id"]
+  );
+
+  await logMiddleware(
+    userId._id,
+    "delete",
+    locataireId,
+    "versement",
+    false,
+    null,
+    null
   );
   next();
 });
 
-versementSchema.pre("remove", async function (next) {
-  // If a document is being deleted
-  this.deletedBy = this.deletedBy; // Replace with the actual user ID or username
-  this.deletedAt = new Date();
-
-  // Log the delete action
-  await logMiddleware(this.deletedBy, "delete versement", this._id);
-  next();
-});
 const Versement = mongoose.model("Versement", versementSchema);
 export default Versement;

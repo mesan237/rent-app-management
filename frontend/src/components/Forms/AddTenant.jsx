@@ -14,16 +14,26 @@ import { chambres } from "../../utils/constants";
 import { DatePicker } from "@mui/x-date-pickers";
 
 import { useForm, Controller } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { openSnackbar } from "../../slices/snackbar/snackbarSlice.js";
 
-import { useUpdateLocataireMutation } from "../../slices/locatairesApiSlice.js";
+import {
+  useCreateLocataireMutation,
+  useUpdateLocataireMutation,
+} from "../../slices/locatairesApiSlice.js";
 
 const AddTenant = ({
   onHandleClose,
-  onHandleForm,
   formType,
   setOpen,
   locataire,
+  refetch,
 }) => {
+  const [createLocataire, { isLoading: createLoading }] =
+    useCreateLocataireMutation();
+
+  const dispatch = useDispatch();
+
   // console.log(locataire);
   const [updateLocataire, { isLoading: loadingUpdate }] =
     useUpdateLocataireMutation();
@@ -32,17 +42,53 @@ const AddTenant = ({
     const formData = getValues();
     const createTenant = { ...formData };
     console.log(createTenant);
-
-    onHandleForm(createTenant);
+    createLocataireHandler(createTenant);
     setOpen(false);
   };
   const handleEditForm = async () => {
     const formData = getValues();
     const updatedLocataire = { ...formData, _id: locataire._id };
-    const result = await updateLocataire(updatedLocataire);
-    console.log("form data", { ...formData, _id: locataire._id }, result);
-    // refetch();
+    updateLocataireHandler(updatedLocataire);
+    // console.log("form data", { ...formData, _id: locataire._id }, result);
+
     setOpen(false);
+  };
+
+  const updateLocataireHandler = async (locataire) => {
+    try {
+      const result = await updateLocataire(locataire);
+      if (result) {
+        dispatch(
+          openSnackbar({
+            message: "Le locataire a été modifié avec succes!",
+            severity: "success",
+          })
+        );
+        refetch();
+      }
+    } catch (error) {
+      console.log(error, "huge error");
+    }
+  };
+
+  const createLocataireHandler = async (locataire) => {
+    try {
+      const result = await createLocataire(locataire);
+      console.log(result);
+      if (result) {
+        dispatch(
+          openSnackbar({
+            message: "Le locataire a été crée avec succes!",
+            severity: "success",
+          })
+        );
+        refetch();
+      } else {
+        console.log(result.error);
+      }
+    } catch (error) {
+      console.log(error, "huge error");
+    }
   };
 
   const {

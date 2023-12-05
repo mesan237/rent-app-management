@@ -2,6 +2,14 @@ import mongoose from "mongoose";
 
 const logSchema = mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  locataireDetails: {
+    num: { type: String },
+    name: { type: String },
+    tel: { type: Number },
+    montantTotal: { type: Number },
+    entryDate: { type: Date },
+  },
+  userEmail: { type: String },
   action: {
     type: String,
     enum: ["update", "create", "delete"],
@@ -18,6 +26,8 @@ const logSchema = mongoose.Schema({
     required: true,
   },
   changes: { type: Object }, // Store the changes made to the record
+  isLocataireDeleted: { type: Boolean, default: false },
+  isUserDeleted: { type: Boolean },
   timestamp: { type: Date, default: Date.now },
 });
 

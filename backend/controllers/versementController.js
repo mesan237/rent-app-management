@@ -3,6 +3,8 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import Locataire from "../models/locataireModel.js";
 import User from "../models/userModel.js";
 
+export let userId;
+
 const getVersements = asyncHandler(async (req, res, next) => {
   const listeVersements = await Versement.find({});
   // res.json(listeVersements);
@@ -23,6 +25,7 @@ const getDetailsVersements = asyncHandler(async (req, res, next) => {
       for (const amt of montants) {
         const locataireDetails = await Locataire.findById(amt.locataire);
         amount.push({
+          _id: amt._id,
           nameLocataire: locataireDetails.name,
           versement: amt.value,
           date: amt.dateVersement,
@@ -30,6 +33,7 @@ const getDetailsVersements = asyncHandler(async (req, res, next) => {
       }
 
       updatedVersements.push({
+        _id: versement._id,
         comments: versement.comments,
         user: userDetails.name,
         nbrVersement: versement.montants.length,
@@ -49,65 +53,79 @@ const getDetailsVersements = asyncHandler(async (req, res, next) => {
 });
 
 const createVersements = asyncHandler(async (req, res) => {
-  const { name, tel, date, montant, num, comments } = req.body;
+  const { date, montant, num } = req.body;
 
-  const versementExists = await Versement.findOne({
-    num: { $regex: new RegExp(num, "i") },
-    name: { $regex: new RegExp(name, "i") },
-  });
+  const locataire = await Locataire.findOne({ num });
   // res.json(VersementExists);
-  // console.log(VersementExists);
 
-  if (versementExists) {
-    res.status(401);
-    throw new Error(" this tenant already exist in the database!!!");
-  } else {
-    const versement = await Versement.create({
-      user: req.user._id,
-      name,
-      tel,
-      date,
-      montant,
-      num,
-      comments,
-    });
-    if (versement) {
-      res.status(201).json({
-        user: versement.user,
-        _id: versement._id,
-        num: versement.num,
-        name: versement.name,
-        tel: versement.tel,
-        montant: versement.montant,
-        date: versement.date,
-        comments: versement.comments,
-        debts: versement.debts,
-        months: versement.months,
-      });
+  const versement = await Versement.findOne({
+    "montants.locataire": locataire._id,
+  });
+
+  const versementId = versement._id;
+  console.log("Versement ID:", versementId);
+
+  const newMontant = {
+    type: "payment",
+    value: montant,
+    locataire: locataire._id,
+    dateVersement: date,
+  };
+  userId = req.user;
+  // console.log(VersementExists);
+  try {
+    const updatedVersement = await Versement.findOneAndUpdate(
+      { _id: versementId },
+      {
+        $push: {
+          montants: {
+            type: "payment",
+            value: montant,
+            locataire: locataire._id,
+            dateVersement: date,
+          },
+        },
+        $set: { updatedAt: Date.now() },
+      },
+      { new: true }
+    );
+
+    if (updatedVersement) {
+      console.log("Versement updated successfully:", updatedVersement);
+      return updatedVersement;
+    } else {
+      console.log("No Versement found for the specified ID.");
+      return null;
     }
+  } catch (error) {
+    console.error("Error updating Versement:", error);
+    throw error;
   }
 });
 
 const deleteVersements = asyncHandler(async (req, res) => {
-  const { num, name, tel, date, comments, months, debts } = req.body;
+  const [montantId, versementId] = req.params.id.split("-");
 
-  // find the Versement
-  const versement = await Versement.findById(req.params.id);
-  if (versement) {
-    versement.num = num;
-    versement.name = null;
-    versement.tel = null;
-    versement.months = null;
-    versement.date = null;
-    versement.debts = null;
-    versement.comments = null;
+  userId = req.user;
 
-    const updatedVersement = await versement.save();
-    res.json(updatedVersement);
-  } else {
-    res.status(400);
-    throw new Error("Versement not found for a possible update");
+  async function deleteMontant(versementId, montantId) {
+    try {
+      const updatedVersement = await Versement.updateOne(
+        { _id: versementId },
+        { $pull: { montants: { _id: montantId } } }
+      );
+
+      if (updatedVersement.nModified === 0) {
+        throw new Error("Montant not found in Versement");
+      }
+
+      console.log("Montant deleted successfully");
+    } catch (error) {
+      console.error("Error deleting montant:", error);
+      throw error;
+    }
   }
+  deleteMontant(versementId, montantId);
 });
 
 const getVersementById = asyncHandler(async (req, res) => {
@@ -121,25 +139,40 @@ const getVersementById = asyncHandler(async (req, res) => {
   }
 });
 
+// I neded a userId for logs
+
 // modifier les donnees d'un Versement
 const updateVersement = asyncHandler(async (req, res) => {
-  const { num, name, tel, date, comments, montant } = req.body;
+  const { date, montant } = req.body;
+  const [montantId, versementId] = req.params.id.split("-");
+  // console.log(date);
+  userId = req.user;
+  try {
+    // Use findOneAndUpdate to find the versement and update the specific montant
+    const updatedVersement = await Versement.findOneAndUpdate(
+      {
+        _id: versementId,
+        "montants._id": montantId, // Match the specific montant within the array
+      },
+      {
+        $set: {
+          "montants.$.value": montant, // Update the 'value' field of the matched montant
+          updatedAt: Date.now(), // Update the updatedAt field of the versement
+          "montants.$.dateVersement": date,
+        },
+      },
+      { new: true } // Return the updated document
+    );
 
-  // find the Versement
-  const versement = await Versement.findById(req.params.id);
-  if (versement) {
-    versement.num = num;
-    versement.montant = montant;
-    versement.name = name;
-    versement.tel = tel;
-    versement.date = date;
-    versement.comments = comments;
+    if (!updatedVersement) {
+      throw new Error("Versement or Montant not found");
+    }
 
-    const updatedVersement = await versement.save();
-    res.json(updatedVersement);
-  } else {
-    res.status(400);
-    throw new Error("Versement not found for a possible update");
+    console.log("Updated Versement:", updatedVersement);
+    return updatedVersement;
+  } catch (error) {
+    console.error("Error updating montant:", error);
+    throw error;
   }
 });
 

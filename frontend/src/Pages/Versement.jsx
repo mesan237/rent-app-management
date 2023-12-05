@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
@@ -13,15 +13,13 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import EditFormVersement from "../components/Forms/versementForm/editFormVersement";
 
-import {
-  useGetVersementsQuery,
-  useUpdateVersementMutation,
-} from "../slices/versementSlices";
+import { useGetVersementsQuery } from "../slices/versementSlices";
 import { Avatar, CircularProgress } from "@mui/material";
-import { blue, pink } from "@mui/material/colors";
+import { pink } from "@mui/material/colors";
+import AjouterVersement from "../components/Forms/versementForm/addForm";
 
 function Row(props) {
   const { row } = props;
@@ -45,23 +43,6 @@ function Row(props) {
         <TableCell align="right">{row.nbrVersement}</TableCell>
         <TableCell align="right">{row.totalAmount}</TableCell>
         <TableCell align="right">{row.comments}</TableCell>
-        <TableCell align="right" sx={{ display: "flex", gap: 1.5 }}>
-          <Avatar
-            onClick={() => console.log("for delete purpose")}
-            variant="rounded"
-            sx={{ bgcolor: "#fce4e4" }}
-          >
-            <DeleteIcon sx={{ color: pink[500] }} />
-          </Avatar>
-
-          <Avatar
-            onClick={() => console.log("for delete purpose")}
-            variant="rounded"
-            sx={{ bgcolor: blue[100] }}
-          >
-            <EditIcon sx={{ color: blue[500] }} />
-          </Avatar>
-        </TableCell>
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -77,21 +58,46 @@ function Row(props) {
                       Date du versement
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Montant</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: "bold" }}>
+                      Actions
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.historique.map((historyRow, idx) => (
-                    <TableRow key={idx}>
-                      <TableCell align="left">
-                        {new Date(historyRow.date).getUTCDate()}{" "}
-                        {new Intl.DateTimeFormat("en-US", {
-                          month: "short",
-                        }).format(new Date(historyRow.date))}{" "}
-                        {new Date(historyRow.date).getUTCFullYear()}
-                      </TableCell>
-                      <TableCell align="left">{historyRow.versement}</TableCell>
-                    </TableRow>
-                  ))}
+                  {row.historique.map((historyRow, idx) => {
+                    const handleClick = () =>
+                      console.log(`${historyRow._id}-${props.versementId}`);
+                    return (
+                      <TableRow key={idx}>
+                        <TableCell align="left">
+                          {new Date(historyRow.date).getUTCDate()}{" "}
+                          {new Intl.DateTimeFormat("en-US", {
+                            month: "short",
+                          }).format(new Date(historyRow.date))}{" "}
+                          {new Date(historyRow.date).getUTCFullYear()}
+                        </TableCell>
+                        <TableCell align="left">
+                          {historyRow.versement}
+                        </TableCell>
+                        <TableCell
+                          align="right"
+                          sx={{ display: "flex", gap: 1.5 }}
+                        >
+                          <Avatar
+                            onClick={handleClick}
+                            variant="rounded"
+                            sx={{ bgcolor: "#fce4e4" }}
+                          >
+                            <DeleteIcon sx={{ color: pink[500] }} />
+                          </Avatar>
+                          <EditFormVersement
+                            refetch={props.refetch}
+                            compoundId={`${historyRow._id}-${props.versementId}`}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </Box>
@@ -118,13 +124,14 @@ Row.propTypes = {
 };
 
 export default function Versement() {
+  const [open, setOpen] = React.useState(false);
+
   const {
     data: listVersements,
     isLoading,
     error,
     refetch,
   } = useGetVersementsQuery();
-  console.log("liste versements", listVersements);
 
   return (
     <Box
@@ -136,6 +143,8 @@ export default function Versement() {
         gap: 4,
       }}
     >
+      {/* Ajouter un versement */}
+      <AjouterVersement />
       <Typography sx={{ fontWeight: "bold", fontSize: "1.8rem" }}>
         Versements
       </Typography>
@@ -156,16 +165,20 @@ export default function Versement() {
               <TableCell align="right" sx={{ fontWeight: "bold" }}>
                 Commentaire
               </TableCell>
-              <TableCell align="right" sx={{ fontWeight: "bold" }}>
-                Actions
-              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {!listVersements ? (
               <CircularProgress />
             ) : (
-              listVersements.map((row, index) => <Row key={index} row={row} />)
+              listVersements.map((row, index) => (
+                <Row
+                  key={index}
+                  row={row}
+                  versementId={row._id}
+                  refetch={refetch}
+                />
+              ))
             )}
           </TableBody>
         </Table>

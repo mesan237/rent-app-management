@@ -35,11 +35,12 @@ const drawerWidth = 240;
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#00bfa5",
+      // main: "#00bfa5",
+      main: blue[500],
       // contrastText: "#E9DB5D",
     },
     secondary: {
-      main: "#1de9b6",
+      main: blue[400],
       // contrastText: "#242105",
     },
   },
@@ -110,7 +111,7 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function Sidebar() {
+export default function Sidebar({ setIntendedDestination }) {
   const open = true;
   const [selectedCategory, setSelectedCategory] = useState(
     localStorage.getItem("selectedCategory") || "Dashboard"
@@ -208,7 +209,10 @@ export default function Sidebar() {
                 }}
               >
                 <ListItemButton
-                  onClick={() => handleActiveButton(category.name)}
+                  onClick={() => {
+                    handleActiveButton(category.name);
+                    setIntendedDestination(category.link);
+                  }}
                   component={RouterLink}
                   to={category.link}
                   sx={{

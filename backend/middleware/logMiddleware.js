@@ -10,34 +10,55 @@ export const logMiddleware = async function (
   action,
   recordId,
   categorie,
+  isLocataireDeleted,
+  locataireDetails,
   changes
 ) {
   try {
-    await Log.create({ user, action, recordId, categorie, changes });
+    await Log.create({
+      user,
+      action,
+      recordId,
+      categorie,
+      isLocataireDeleted,
+      locataireDetails,
+      changes,
+    });
   } catch (error) {
     console.error("Error logging action:", error);
   }
 };
 
 export const fetchingLogsDetails = asyncHandler(async (req, res, next) => {
-  // console.log(req.history);
   const newLogs = [];
 
   for (const log of req.history) {
     try {
-      const depenseDetails = await Depense.findById(log.recordId);
-      const details = await Locataire.findById(log.recordId);
-      const userDetails = await User.findById(log.user);
+      let nameId;
+      if (log.categorie === "depense") {
+        const depenseDetails = await Depense.findById(log.recordId).select(
+          "designation"
+        );
+        nameId = depenseDetails.designation;
+      } else if (log.categorie === "utilisateur") {
+        const user = await User.findById(log.user).select("name");
+        nameId = user.name;
+      } else if (log.categorie === "locataire" && !log.isLocataireDeleted) {
+        const locataireDetails = await Locataire.findById(log.recordId).select(
+          "name"
+        );
+        nameId = locataireDetails.name;
+      } else {
+        nameId = log.locataireDetails.name;
+      }
+
+      const user = await User.findById(log.user).select("name");
+
       newLogs.push({
         logId: log._id,
-        userName: userDetails.name,
+        userName: user.name,
         action: log.action,
-        nameId:
-          log.categorie === "depense"
-            ? depenseDetails.designation
-            : log.categorie === "utilisateur"
-            ? userDetails.name
-            : details.name,
+        nameId,
         categorie: log.categorie,
         changes: log.changes,
         date: log.timestamp,

@@ -32,10 +32,9 @@ export const locaTairesApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["Locataire"],
     }),
     deleteLocataire: builder.mutation({
-      query: (data) => ({
-        url: `${LOCATAIRES_URL}/${data._id}`,
-        method: "PUT",
-        body: data,
+      query: (tenantId) => ({
+        url: `${LOCATAIRES_URL}/${tenantId}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Locataire"],
     }),

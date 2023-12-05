@@ -1,10 +1,10 @@
 import * as React from "react";
-
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
-import AddTenant from "./AddTenant";
 
-function AddUser({ refetch }) {
+import AddVersement from "./AddVersement";
+
+function AddUser() {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -16,14 +16,17 @@ function AddUser({ refetch }) {
 
   return (
     <React.Fragment>
-      <Button variant="outlined" onClick={handleClickOpen}>
-        Ajouter un locataire
+      <Button
+        variant="contained"
+        onClick={handleClickOpen}
+        sx={{ width: "fit-content", fontWeight: "bold" }}
+      >
+        Ajouter un versement
       </Button>
       <Dialog open={open} onClose={handleClose}>
-        <AddTenant
+        <AddVersement
           onHandleClose={handleClose}
           formType="add"
-          refetch={refetch}
           setOpen={setOpen}
         />
       </Dialog>
@@ -31,4 +34,12 @@ function AddUser({ refetch }) {
   );
 }
 
-export default AddUser;
+const AjouterVersement = () => {
+  return (
+    <>
+      <AddUser />
+    </>
+  );
+};
+
+export default AjouterVersement;

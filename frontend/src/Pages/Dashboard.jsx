@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
 import Box from "@mui/material/Box";
@@ -8,6 +8,8 @@ import { GiTakeMyMoney, GiReceiveMoney } from "react-icons/gi";
 import { TbDoorEnter } from "react-icons/tb";
 import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
 import { LineChart } from "@mui/x-charts/LineChart";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -88,6 +90,7 @@ const xLabels = [
 ];
 
 const Dashboard = () => {
+  // console.log(userInfo);
   return (
     <Box
       sx={{

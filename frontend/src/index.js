@@ -31,10 +31,7 @@ const router = createBrowserRouter([
         path: "depenses",
         element: <Depenses />,
       },
-      {
-        path: "login",
-        element: <LoginForm />,
-      },
+
       {
         path: "/historiques",
         element: <Historiques />,
@@ -44,6 +41,10 @@ const router = createBrowserRouter([
         element: <Versement />,
       },
     ],
+  },
+  {
+    path: "login",
+    element: <LoginForm />,
   },
 ]);
 
