@@ -13,15 +13,9 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import * as React from "react";
 
 import AddTenant from "./AddTenant.jsx";
-import { pink, red } from "@mui/material/colors";
+import { blue, pink } from "@mui/material/colors";
 
-import Button from "@mui/material/Button";
 import { styled } from "@mui/material/styles";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogActions from "@mui/material/DialogActions";
-import IconButton from "@mui/material/IconButton";
-import CloseIcon from "@mui/icons-material/Close";
 import Typography from "@mui/material/Typography";
 import { Backdrop, CircularProgress } from "@mui/material";
 import CustomDialogValidation from "../Widgets/CustomDialogValidation.jsx";
@@ -41,14 +35,16 @@ function CustomizedDialogs({
   openDelete,
   handleClickOpenDelete,
   handleCloseDelete,
+  deactivate,
 }) {
   return (
     <React.Fragment>
       <GridActionsCellItem
-        icon={<DeleteIcon sx={{ color: pink[500] }} />}
+        icon={<DeleteIcon sx={{ color: !deactivate ? pink[500] : "#ccc" }} />}
         label="Delete"
         onClick={handleClickOpenDelete}
         color="inherit"
+        disabled={deactivate}
       />
       <CustomDialogValidation
         open={openDelete}
@@ -108,7 +104,7 @@ function AddUser({ rowId, refetch }) {
       setNum(locataire.num);
       setTel(locataire.tel);
     }
-  }, [locataire]);
+  }, [locataire, refetch]);
 
   const [open, setOpen] = useState(false);
 
@@ -146,11 +142,12 @@ function AddUser({ rowId, refetch }) {
         <CircularProgress color="inherit" />
       </Backdrop>
       <GridActionsCellItem
-        icon={<EditIcon color="primary" />}
+        icon={<EditIcon sx={{ color: locataire?.name ? blue[500] : "#ccc" }} />}
         label="Edit"
         className="textPrimary"
         onClick={handleClickOpen}
         color="inherit"
+        disabled={!locataire?.name}
       />
       <CustomizedDialogs
         onHandleDelete={deleteLocataireHandler}
@@ -158,6 +155,7 @@ function AddUser({ rowId, refetch }) {
         handleClickOpenDelete={handleClickOpenDelete}
         handleCloseDelete={handleCloseDelete}
         openDelete={openDelete}
+        deactivate={!locataire?.name}
       />
       <Dialog open={open} onClose={handleClose}>
         <AddTenant

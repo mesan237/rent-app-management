@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import MuiPagination from "@mui/material/Pagination";
 
 import { closeSnackbar } from "../slices/snackbar/snackbarSlice";
+import { Typography } from "@mui/material";
 // import { blue } from "@mui/material/colors";
 
 function Pagination({ page, onPageChange, className }) {
@@ -37,7 +38,6 @@ function Pagination({ page, onPageChange, className }) {
       onChange={(event, newPage) => {
         onPageChange(event, newPage - 1);
       }}
-      // sx={{ color: blue["A700"] }}
     />
   );
 }
@@ -131,11 +131,19 @@ const ListeChambres = () => {
     dispatch(closeSnackbar());
   };
 
-  console.log("rows", rows);
+  // console.log("rows", rows);
   return (
     <Box sx={{ width: 0.92, mx: "auto" }}>
-      <div className="lists">
-        <AddUser refetch={refetch} />
+      <div
+        className="lists"
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+      >
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography sx={{ fontWeight: "bold", fontSize: "1.7rem" }}>
+            Liste des locataires
+          </Typography>
+          <AddUser refetch={refetch} locataires={listLocataires} />
+        </Box>
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}

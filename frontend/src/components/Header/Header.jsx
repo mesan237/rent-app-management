@@ -61,9 +61,10 @@ function Header() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
-      <MenuItem onClick={handleMenuClose}>My account</MenuItem>
-      {userInfo ? <MenuItem onClick={handleLogout}>Logout</MenuItem> : null}
+      <MenuItem onClick={handleMenuClose}>Compte</MenuItem>
+      {userInfo ? (
+        <MenuItem onClick={handleLogout}>Se deconnecter</MenuItem>
+      ) : null}
     </Menu>
   );
 
@@ -95,7 +96,7 @@ function Header() {
         }}
       >
         <Box sx={{ display: { xs: "none", md: "flex", gap: 3 } }}>
-          <IconButton
+          {/* <IconButton
             size="large"
             aria-label="show 17 new notifications"
             color="primary"
@@ -103,7 +104,7 @@ function Header() {
             <Badge badgeContent={17} color="error">
               <NotificationsIcon />
             </Badge>
-          </IconButton>
+          </IconButton> */}
           <Button
             id="demo-customized-button"
             // aria-controls={open ? 'demo-customized-menu' : undefined}
@@ -112,7 +113,7 @@ function Header() {
             variant="text"
             disableElevation
             startIcon={
-              <Avatar sx={{ bgcolor: teal[100], color: teal[600] }}>
+              <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
                 <PersonRoundedIcon />
               </Avatar>
             }
@@ -122,17 +123,6 @@ function Header() {
           >
             {userInfo ? userInfo.name : ""}
           </Button>
-          {/* <ListItemButton
-          onClick={handleProfileMenuOpen}
-          sx={{ width: "100px", px: 0 }}
-        >
-          <ListItemAvatar>
-            <Avatar sx={{ bgcolor: blue[100], color: blue[600] }}>
-              <PersonRoundedIcon />
-            </Avatar>
-          </ListItemAvatar>
-          <ListItemText primary={userInfo ? userInfo.name : ""} />
-        </ListItemButton> */}
         </Box>
         {renderMenu}
       </Box>

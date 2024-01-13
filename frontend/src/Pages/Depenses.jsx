@@ -14,19 +14,15 @@ import {
   useGetDepensesQuery,
 } from "../slices/depensesApiSlice.js";
 import CircularProgress from "@mui/material/CircularProgress";
-import { blue, green, grey, red, pink, teal } from "@mui/material/colors";
+import { pink, teal } from "@mui/material/colors";
 
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import AddExpenses from "../components/Forms/FormExpense/AddExpenses.jsx";
 import EditExpenses from "../components/Forms/FormExpense/EditExpenses.jsx";
 import MuiPagination from "@mui/material/Pagination";
 import Avatar from "@mui/material/Avatar";
 
-// import EditIcon from "@mui/icons-material/Edit";
-
 import { GridToolbar } from "@mui/x-data-grid";
-import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -242,22 +238,11 @@ const Depenses = () => {
             sx={{
               border: 0,
               [`& .${gridClasses.row}`]: {
-                // bgcolor: (theme) =>
-
-                // theme.palette.mode === "light" ? blue[200] : blue[900],
-                // borderInlineStart: "8px solid hsl(209.09deg 57.89% 88.82%)",
-                // borderRadius: "9px",
-                // background: "hsl(209.09deg 57.89% 88.82%)",
-                // #43e6e5
                 boxShadow: 1,
                 width: 0.98,
               },
               "& .super-app-theme--header": {
                 backgroundColor: teal["A700"],
-                // background:
-                // "linear-gradient(to right, #002f61, #00507b, #006e8e, #008b98, #00a79c)",
-                // background:
-                // "linear-gradient(to top, hsl(211.67deg 29.03% 51.37%), hsl(204.23deg 54.17% 81.18%) 200px), linear-gradient(to top, hsl(221.25deg 36.36% 34.51%), hsl(204.23deg 54.17% 81.18%) 30px)",
                 color: "#fff",
                 fontWeight: "700",
                 fontSize: "1rem",

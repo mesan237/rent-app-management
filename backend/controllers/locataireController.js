@@ -1,9 +1,26 @@
 import Locataire from "../models/locataireModel.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
-const getLocataires = asyncHandler(async (req, res) => {
-  const listesLocataires = await Locataire.find({});
-  res.json(listesLocataires);
+const getLocataires = asyncHandler(async (req, res, next) => {
+  console.log(req.query.total);
+  if (req.query.total) {
+    console.log("ok next ...");
+    const filterB = { name: { $exists: true }, num: { $regex: /B/i } }; // Case-insensitive regex for letter "B"
+    const filterA = { name: { $exists: true }, num: { $regex: /A/i } }; // Case-insensitive regex for letter "A"
+
+    const countWithB = await Locataire.countDocuments(filterB);
+    const countWithA = await Locataire.countDocuments(filterA);
+
+    if (countWithA && countWithB) {
+      res.status(200).json({ A: countWithA, B: countWithB });
+    } else {
+      res.status(404);
+      throw new Error("failed to get the total");
+    }
+  } else {
+    const listesLocataires = await Locataire.find({});
+    res.json(listesLocataires);
+  }
 });
 
 const createLocataires = asyncHandler(async (req, res) => {
@@ -15,8 +32,6 @@ const createLocataires = asyncHandler(async (req, res) => {
   });
 
   const roomExists = await Locataire.findOne({ num });
-  // res.json(locataireExists);
-  // console.log(locataireExists);
   const locataireFields = {
     user: req.user._id,
     name,
@@ -28,7 +43,7 @@ const createLocataires = asyncHandler(async (req, res) => {
   };
   if (locataireExists) {
     res.status(401);
-    throw new Error(" this tenant already exist in the database!!!");
+    throw new Error(" Ce locataire existe déja dans la base de données!!!");
   } else if (roomExists && roomExists.deletedAt) {
     let newMonths = getMonthDifference(new Date(date), new Date());
     const annee = Math.floor(newMonths / 12);
@@ -134,7 +149,7 @@ const updateLocataires = asyncHandler(async (req, res) => {
     res.json(updatedLocataire);
   } else {
     res.status(400);
-    throw new Error("Locataire not found for a possible update");
+    throw new Error("Locataire pas trouvé pour une eventuelle modification");
   }
 });
 function getMonthDifference(startDate, endDate) {

@@ -21,6 +21,7 @@ import {
   useCreateLocataireMutation,
   useUpdateLocataireMutation,
 } from "../../slices/locatairesApiSlice.js";
+import { useState } from "react";
 
 const AddTenant = ({
   onHandleClose,
@@ -28,6 +29,7 @@ const AddTenant = ({
   setOpen,
   locataire,
   refetch,
+  locataires,
 }) => {
   const [createLocataire, { isLoading: createLoading }] =
     useCreateLocataireMutation();
@@ -57,7 +59,12 @@ const AddTenant = ({
   const updateLocataireHandler = async (locataire) => {
     try {
       const result = await updateLocataire(locataire);
-      if (result) {
+      if (result.error) {
+        openSnackbar({
+          message: result.error.error,
+          severity: "error",
+        });
+      } else {
         dispatch(
           openSnackbar({
             message: "Le locataire a été modifié avec succes!",
@@ -67,6 +74,12 @@ const AddTenant = ({
         refetch();
       }
     } catch (error) {
+      dispatch(
+        openSnackbar({
+          message: error,
+          severity: "error",
+        })
+      );
       console.log(error, "huge error");
     }
   };
@@ -74,8 +87,15 @@ const AddTenant = ({
   const createLocataireHandler = async (locataire) => {
     try {
       const result = await createLocataire(locataire);
-      console.log(result);
-      if (result) {
+      console.log(" result ", result);
+      if (result.error) {
+        dispatch(
+          openSnackbar({
+            message: result.error.error,
+            severity: "error",
+          })
+        );
+      } else {
         dispatch(
           openSnackbar({
             message: "Le locataire a été crée avec succes!",
@@ -83,10 +103,15 @@ const AddTenant = ({
           })
         );
         refetch();
-      } else {
         console.log(result.error);
       }
     } catch (error) {
+      dispatch(
+        openSnackbar({
+          message: error,
+          severity: "error",
+        })
+      );
       console.log(error, "huge error");
     }
   };
@@ -101,7 +126,7 @@ const AddTenant = ({
   const onSubmit = (data) => {
     formType === "edit" ? handleEditForm(data) : handleAddForm(data);
   };
-
+  const [listLocataires, setListLocataires] = useState([]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -184,7 +209,7 @@ const AddTenant = ({
           <Controller
             name="num"
             control={control}
-            defaultValue={formType === "edit" ? locataire.num : "1A"}
+            defaultValue={formType === "edit" ? locataire.num : "11A"}
             rules={{ required: "N° chambre is required" }}
             render={({ field }) => (
               <TextField
@@ -192,16 +217,45 @@ const AddTenant = ({
                 error={!!errors.num}
                 helperText={errors.num && errors.num.message}
                 id="outlined-numero-chambre"
+                disabled={formType === "edit"}
                 select
                 label="N° chambre"
                 margin="normal"
                 defaultValue="1A"
               >
-                {chambres.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
+                {formType !== "edit" &&
+                  locataires
+                    .filter((loc) => !loc.name)
+                    .sort((a, b) => {
+                      // Extract numeric and alphabetic parts
+                      const [numA, alphaA] = a.num
+                        .match(/(\d+)([A-Za-z]*)/)
+                        .slice(1);
+                      const [numB, alphaB] = b.num
+                        .match(/(\d+)([A-Za-z]*)/)
+                        .slice(1);
+
+                      // Compare numeric parts first
+                      const numComparison =
+                        parseInt(numA, 10) - parseInt(numB, 10);
+
+                      if (numComparison === 0) {
+                        return alphaA.localeCompare(alphaB);
+                      }
+                      return numComparison;
+                    })
+
+                    .map((loc) => (
+                      <MenuItem key={loc.num} value={loc.num}>
+                        {loc.num}
+                      </MenuItem>
+                    ))}
+                {formType === "edit" &&
+                  chambres.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
               </TextField>
             )}
           />

@@ -2,8 +2,15 @@ import Depense from "../models/depenseModel.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 
 const getDepenses = asyncHandler(async (req, res) => {
-  const listesDepenses = await Depense.find({});
-  res.json(listesDepenses);
+  try {
+    const listesDepenses = await Depense.find({});
+    res.json(listesDepenses);
+  } catch (error) {
+    console.error("Error in getDepenses:", error);
+
+    res.status(401);
+    throw new Error(" Probleme d'affichage au niveau du serveur!");
+  }
 });
 
 const createDepenses = asyncHandler(async (req, res) => {
@@ -31,14 +38,14 @@ const createDepenses = asyncHandler(async (req, res) => {
     });
     if (createdDepense) {
       res.status(201).json({
-        user: createDepenses.user,
-        _id: createDepenses._id,
-        batiment: createDepenses.batiment,
-        designation: createDepenses.designation,
-        date: createDepenses.date,
-        montant: createDepenses.montant,
-        comments: createDepenses.comments,
-        categorie: createDepenses.categorie,
+        user: createdDepense.user,
+        _id: createdDepense._id,
+        batiment: createdDepense.batiment,
+        designation: createdDepense.designation,
+        date: createdDepense.date,
+        montant: createdDepense.montant,
+        comments: createdDepense.comments,
+        categorie: createdDepense.categorie,
       });
     }
   }
@@ -51,7 +58,7 @@ const getDepenseById = asyncHandler(async (req, res) => {
     res.json(depense);
   } else {
     res.status(400);
-    throw new Error("Depense pas trouvé");
+    throw new Error("Depense pas trouvée");
   }
 });
 
@@ -75,7 +82,9 @@ const modifierDepenses = asyncHandler(async (req, res) => {
     res.json(updatedDepense);
   } else {
     res.status(400);
-    throw new Error("expense not found for a possible update");
+    throw new Error(
+      "La depense n'a pas été trouvée pour une eventeulle mise à jour!"
+    );
   }
 });
 

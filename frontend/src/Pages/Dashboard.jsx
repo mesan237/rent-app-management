@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { styled } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
 import Box from "@mui/material/Box";
@@ -8,8 +8,26 @@ import { GiTakeMyMoney, GiReceiveMoney } from "react-icons/gi";
 import { TbDoorEnter } from "react-icons/tb";
 import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
 import { LineChart } from "@mui/x-charts/LineChart";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+
+import { useGetVersementsQuery } from "../slices/versementSlices";
+import { useGetLocatairesQuery } from "../slices/locatairesApiSlice";
+import { useGetDepensesQuery } from "../slices/depensesApiSlice";
+import { useMemo } from "react";
+
+function monthsBetweenDates(startDate, endDate) {
+  // If endDate is not provided, use the current date
+  endDate = endDate || new Date();
+
+  var startYear = startDate.getFullYear();
+  var startMonth = startDate.getMonth();
+
+  var endYear = endDate.getFullYear();
+  var endMonth = endDate.getMonth();
+
+  var months = (endYear - startYear) * 12 + (endMonth - startMonth);
+
+  return months;
+}
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
@@ -60,7 +78,7 @@ const percentageStyle = {
 };
 
 const data = [
-  { value: 5, label: "Gain" },
+  { value: -5, label: "Gain" },
   { value: 10, label: "Depenses" },
   { value: 15, label: "Manque à gagner" },
 ];
@@ -90,7 +108,154 @@ const xLabels = [
 ];
 
 const Dashboard = () => {
-  // console.log(userInfo);
+  // const monthlySums = [];
+  const loyerA = 15000;
+  const loyerB = 12000;
+  const loyerBS = 25000;
+  const startDate = new Date("2023-09-01T00:00:00.000Z");
+
+  // listes des depenses
+  const {
+    data: listDepenses,
+    isLoading: loadingExpense,
+    error: expenseError,
+    // refetch,
+  } = useGetDepensesQuery();
+
+  // listes des versements
+  const {
+    data: listVersements,
+    isLoading: loadingVer,
+    error: verError,
+    // refetch,
+  } = useGetVersementsQuery();
+
+  // nombre de locataires par batiments
+  const {
+    data: totalLocataire,
+    isLoading,
+    error,
+  } = useGetLocatairesQuery({ total: true });
+
+  // liste des locataires
+  const { data: locataires } = useGetLocatairesQuery();
+
+  // Calculate the sum of "montant" values using the reduce function
+
+  const sumMontant = useMemo(() => {
+    if (!listDepenses) return 2; // Default value if data is not available
+
+    return listDepenses
+      .filter((entry) => new Date(entry.date) >= startDate)
+      .reduce((acc, item) => acc + item.montant, 0);
+  }, [listDepenses, startDate]);
+
+  // listes des depenses
+  const sumAmountDeposit = useMemo(() => {
+    if (!listVersements) return 2; // Default value if data is not available
+
+    return listVersements.reduce((acc, item) => {
+      const historicalVersements = item.historique.filter(
+        (entry) => new Date(entry.date) >= startDate
+      );
+
+      const versementSum = historicalVersements.reduce(
+        (entryAcc, entryItem) => entryAcc + entryItem.versement,
+        0
+      );
+
+      return acc + versementSum;
+    }, 0);
+  }, [listVersements, startDate]);
+
+  // Calculate the sum of debts if they exist and are less than 0
+  const sumDebts = useMemo(() => {
+    if (!locataires) return 1; // Default value if data is not available
+
+    return locataires.reduce((acc, item) => {
+      // Check if "debts" property exists and is less than 0
+      if (item.debts && item.debts < 0) {
+        return acc + item.debts;
+      }
+      return acc;
+    }, 0);
+  }, [locataires]);
+
+  // Iterate over each entry in the data
+
+  const monthlySums = useMemo(() => {
+    const result = [];
+
+    if (listVersements) {
+      listVersements.forEach((entry) => {
+        entry.historique.forEach((historiqueEntry) => {
+          const date = new Date(historiqueEntry.date);
+
+          if (date >= new Date("2023-09-01")) {
+            const monthYearKey = `${date.getMonth() + 1}-${date.getFullYear()}`;
+            const monthKey = xLabels[date.getMonth()];
+
+            const monthlySumEntry = result.find(
+              (entry) => entry.monthYear === monthYearKey
+            );
+
+            if (monthlySumEntry) {
+              monthlySumEntry.sum += historiqueEntry.versement;
+            } else {
+              result.push({
+                monthYear: monthYearKey,
+                sum: historiqueEntry.versement,
+                month: monthKey,
+              });
+            }
+          }
+        });
+      });
+
+      // Sort the result array
+      result.sort((a, b) => {
+        const [aMonth, aYear] = a.monthYear.split("-");
+        const [bMonth, bYear] = b.monthYear.split("-");
+
+        if (aYear !== bYear) {
+          return aYear - bYear;
+        }
+
+        return aMonth - bMonth;
+      });
+    }
+
+    return result;
+  }, [listVersements, xLabels]);
+
+  console.log(listVersements && monthlySums);
+
+  // manque a gagner
+
+  var amountOfMonth = monthsBetweenDates(new Date("2023-09-01"), new Date());
+
+  const montantAGagner =
+    amountOfMonth * loyerB * (totalLocataire?.B - 2) +
+    loyerBS * 2 * 4 +
+    loyerA * totalLocataire?.A * amountOfMonth;
+
+  const manqueAGagner = (
+    ((montantAGagner - sumAmountDeposit) / montantAGagner) *
+    100
+  ).toFixed(2);
+  const gains = (
+    ((sumAmountDeposit - sumMontant) / montantAGagner) *
+    100
+  ).toFixed(2);
+  const depenses = ((sumMontant / montantAGagner) * 100).toFixed(2);
+  console.log(sumAmountDeposit, sumMontant, manqueAGagner, gains, depenses);
+
+  const pieChartDatas = [
+    { value: gains, label: "Gain" },
+    { value: depenses, label: "Depenses" },
+    { value: manqueAGagner, label: "Manque à gagner" },
+  ];
+
   return (
     <Box
       sx={{
@@ -116,7 +281,13 @@ const Dashboard = () => {
             </div>
             <div style={{ alignSelf: "center" }}>
               <div style={{ fontSize: "0.85rem" }}>Total Entrees</div>
-              <div style={{ margin: "5px auto" }}>190.000 FCFA</div>
+              <div style={{ margin: "5px auto" }}>
+                {listVersements &&
+                  sumAmountDeposit.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                  })}{" "}
+                FCFA
+              </div>
               <div style={{ fontSize: "0.85rem" }}>
                 <span style={percentageStyle}>+12%</span> de plus que le mois
                 dernier
@@ -131,7 +302,13 @@ const Dashboard = () => {
             </div>
             <div style={{ alignSelf: "center" }}>
               <div style={{ fontSize: "0.85rem" }}>Total Depenses</div>
-              <div style={{ margin: "5px auto" }}>100.000 FCFA</div>
+              <div style={{ margin: "5px auto" }}>
+                {listDepenses &&
+                  sumMontant.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                  })}{" "}
+                FCFA
+              </div>
               <div style={{ fontSize: "0.85rem" }}>
                 <span style={percentageStyle}>-13%</span> de plus que le mois
                 dernier
@@ -149,7 +326,9 @@ const Dashboard = () => {
             <div style={{ alignSelf: "center" }}>
               <div style={{ fontSize: "0.85rem" }}>Total Locataires</div>
               <div style={{ margin: "5px auto" }}>
-                Batiment A: <span>13</span> - B: <span>7</span>
+                Batiment A:{" "}
+                <span>{totalLocataire ? totalLocataire.A : "13"} </span> - B:{" "}
+                <span>{totalLocataire ? totalLocataire.B : "7"}</span>
               </div>
               <div style={{ fontSize: "0.85rem" }}>
                 <span style={percentageStyle}>+12%</span> de plus que le mois
@@ -167,7 +346,13 @@ const Dashboard = () => {
             </div>
             <div style={{ alignSelf: "center" }}>
               <div>Total impayés</div>
-              <div style={{ margin: "5px auto" }}>40.000 FCFA</div>
+              <div style={{ margin: "5px auto" }}>
+                {locataires &&
+                  sumDebts.toLocaleString(undefined, {
+                    minimumFractionDigits: 0,
+                  })}{" "}
+                FCFA
+              </div>
               <div style={{ fontSize: "0.85rem" }}>
                 <span style={percentageStyle}>+1%</span> de reduction des dettes
               </div>
@@ -202,10 +387,19 @@ const Dashboard = () => {
               bottom: 80,
             }}
             // dataset={dataset}
-            xAxis={[{ scaleType: "band", data: xLabels }]}
+            xAxis={[
+              {
+                scaleType: "band",
+                // data: monthlySums
+                //   ? monthlySums.map((item) => item.month)
+                //   : xLabels,
+                data: xLabels,
+              },
+            ]}
             series={[
               {
                 area: true,
+                // data: monthlySums ? monthlySums.map((item) => item.sum) : uData,
                 data: uData,
                 label: "Versement",
                 valueFormatter,
@@ -238,7 +432,7 @@ const Dashboard = () => {
             }}
             series={[
               {
-                data: [...data],
+                data: pieChartDatas ? [...pieChartDatas] : [...data],
                 arcLabel: (item) => `${item.value}%`,
                 innerRadius: 23,
                 outerRadius: 100,
@@ -258,7 +452,7 @@ const Dashboard = () => {
             ]}
             sx={{
               [`& .${pieArcLabelClasses.root}`]: {
-                fill: "white",
+                fill: "black",
                 fontWeight: "bold",
               },
             }}

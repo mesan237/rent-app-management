@@ -13,54 +13,27 @@ import DialogTitle from "@mui/material/DialogTitle";
 import { DatePicker } from "@mui/x-date-pickers";
 
 import { useForm, Controller } from "react-hook-form";
+import { openSnackbar } from "../../../slices/snackbar/snackbarSlice";
 
 import {
   useUpdateVersementMutation,
   useCreateVersementMutation,
 } from "../../../slices/versementSlices";
-import { useGetLocatairesQuery } from "../../../slices/locatairesApiSlice";
-import { useEffect } from "react";
-import { useState } from "react";
+import { useDispatch } from "react-redux";
 
-const AddVersement = ({ onHandleClose, formType, compoundId, refetch }) => {
-  // console.log(onHandleClose);
-
-  const { data: listLocataires, isLoading: loadingLocataireDtails } =
-    useGetLocatairesQuery();
+const AddVersement = ({
+  onHandleClose,
+  formType,
+  compoundId,
+  refetch,
+  locataires,
+}) => {
   const [createVersement, { isLoading: loadingCreation }] =
     useCreateVersementMutation();
-  const [filteredRows, setFilteredRows] = useState([]);
 
-  useEffect(() => {
-    // Use useEffect to update filteredRows when listLocataires changes
-    if (!loadingLocataireDtails && listLocataires) {
-      const filteredData = listLocataires
-        .filter((locataire) => locataire.name)
-        .map((locataire) => ({ num: locataire.num, name: locataire.name }))
-        .sort((a, b) => {
-          // Extract numeric and alphabetic parts
-          const [numA, alphaA] = a.num.match(/(\d+)([A-Za-z]*)/).slice(1);
-          const [numB, alphaB] = b.num.match(/(\d+)([A-Za-z]*)/).slice(1);
-
-          // Compare numeric parts first
-          const numComparison = parseInt(numA, 10) - parseInt(numB, 10);
-
-          // If numeric parts are equal, compare alphabetic parts
-          if (numComparison === 0) {
-            return alphaA.localeCompare(alphaB);
-          }
-
-          return numComparison;
-        });
-
-      setFilteredRows(filteredData);
-    } else {
-      setFilteredRows([]);
-    }
-  }, [loadingLocataireDtails, listLocataires]);
-
+  const dispatch = useDispatch();
   // console.log("liste versements", listVersements);
-  console.log(filteredRows);
+  console.log("locataires", locataires, "refetch", refetch);
 
   const [updateVersement, { isLoading: loadingUpdate }] =
     useUpdateVersementMutation();
@@ -69,14 +42,38 @@ const AddVersement = ({ onHandleClose, formType, compoundId, refetch }) => {
     const formData = getValues();
     const versementData = { ...formData };
     console.log(versementData);
-
-    createVersement(versementData);
-    onHandleClose();
+    try {
+      const result = createVersement(versementData);
+      if (result.error) {
+        dispatch(
+          openSnackbar({
+            message: result.error.error,
+            severity: "error",
+          })
+        );
+      } else {
+        dispatch(
+          openSnackbar({
+            message: "Le versement a été créé avec succes!",
+            severity: "success",
+          })
+        );
+        refetch();
+      }
+    } catch (error) {
+      dispatch(
+        openSnackbar({
+          message: error,
+          severity: "error",
+        })
+      );
+    }
   };
+
   const handleEditForm = async () => {
     const formData = getValues();
     const updatedVersement = { ...formData, _id: compoundId };
-    const result = await updateVersement(updatedVersement);
+    await updateVersement(updatedVersement);
   };
 
   const {
@@ -126,7 +123,7 @@ const AddVersement = ({ onHandleClose, formType, compoundId, refetch }) => {
                   defaultValue=""
                   sx={{ width: "100%" }}
                 >
-                  {filteredRows.map((option) => (
+                  {locataires.map((option) => (
                     <MenuItem key={option.num} value={option.num}>
                       {`${option.num} - ${option.name}`}
                     </MenuItem>

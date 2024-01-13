@@ -5,8 +5,6 @@ import {
   PaymentsRounded,
   AccountBalanceRounded,
 } from "@mui/icons-material";
-const connection =
-  "mongodb+srv://negokamgaing:<password>@app-rent-mern.hzderzk.mongodb.net/?retryWrites=true&w=majority";
 
 const categories = [
   { name: "Dashboard", icon: <GridViewOutlined />, link: "/dashboard" },

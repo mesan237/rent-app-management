@@ -6,24 +6,40 @@ import User from "../models/userModel.js";
 export let userId;
 
 const getVersements = asyncHandler(async (req, res, next) => {
-  const listeVersements = await Versement.find({});
-  // res.json(listeVersements);
-  req.versement = listeVersements;
-  next();
+  try {
+    const listeVersements = await Versement.find({});
+    req.versement = listeVersements;
+    next();
+  } catch (error) {
+    // Handle the error if necessary
+    res.status(500);
+    throw new Error("Probleme d'affichage !");
+  }
 });
 
-const getDetailsVersements = asyncHandler(async (req, res, next) => {
+const getDetailsVersements = asyncHandler(async (req, res) => {
   const listVersements = req.versement;
   const updatedVersements = [];
+
+  const userIds = listVersements.map((versement) => versement.user);
+  const locataireIds = listVersements.flatMap((versement) =>
+    versement.montants.map((amt) => amt.locataire)
+  );
+
+  const [users, locataires] = await Promise.all([
+    User.find({ _id: { $in: userIds } }, { name: 1 }),
+    Locataire.find({ _id: { $in: locataireIds } }, { name: 1 }),
+  ]);
 
   for (const versement of listVersements) {
     try {
       const montants = versement.montants;
       const amount = [];
-      const userDetails = await User.findById(versement.user);
 
       for (const amt of montants) {
-        const locataireDetails = await Locataire.findById(amt.locataire);
+        const locataireDetails = locataires.find((locataire) =>
+          locataire._id.equals(amt.locataire)
+        );
         amount.push({
           _id: amt._id,
           nameLocataire: locataireDetails.name,
@@ -31,6 +47,8 @@ const getDetailsVersements = asyncHandler(async (req, res, next) => {
           date: amt.dateVersement,
         });
       }
+
+      const userDetails = users.find((user) => user._id.equals(versement.user));
 
       updatedVersements.push({
         _id: versement._id,
@@ -49,6 +67,7 @@ const getDetailsVersements = asyncHandler(async (req, res, next) => {
       });
     }
   }
+
   res.json(updatedVersements);
 });
 

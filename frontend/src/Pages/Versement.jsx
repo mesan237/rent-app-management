@@ -17,9 +17,15 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditFormVersement from "../components/Forms/versementForm/editFormVersement";
 
 import { useGetVersementsQuery } from "../slices/versementSlices";
-import { Avatar, CircularProgress } from "@mui/material";
+import { Avatar, CircularProgress, Snackbar } from "@mui/material";
 import { pink } from "@mui/material/colors";
 import AjouterVersement from "../components/Forms/versementForm/addForm";
+import { useGetLocatairesQuery } from "../slices/locatairesApiSlice";
+import { useEffect } from "react";
+import { useState } from "react";
+import MuiAlert from "@mui/material/Alert";
+import { useDispatch, useSelector } from "react-redux";
+import { closeSnackbar } from "../slices/snackbar/snackbarSlice";
 
 function Row(props) {
   const { row } = props;
@@ -124,7 +130,35 @@ Row.propTypes = {
 };
 
 export default function Versement() {
-  const [open, setOpen] = React.useState(false);
+  const [filteredRows, setFilteredRows] = useState([]);
+  const { data: listLocataires, isLoading: loadingLocataireDtails } =
+    useGetLocatairesQuery();
+
+  useEffect(() => {
+    // Use useEffect to update filteredRows when listLocataires changes
+    if (!loadingLocataireDtails && listLocataires) {
+      const filteredData = listLocataires
+        .filter((locataire) => locataire.name)
+        .map((locataire) => ({ num: locataire.num, name: locataire.name }))
+        .sort((a, b) => {
+          // Extract numeric and alphabetic parts
+          const [numA, alphaA] = a.num.match(/(\d+)([A-Za-z]*)/).slice(1);
+          const [numB, alphaB] = b.num.match(/(\d+)([A-Za-z]*)/).slice(1);
+
+          // Compare numeric parts first
+          const numComparison = parseInt(numA, 10) - parseInt(numB, 10);
+
+          if (numComparison === 0) {
+            return alphaA.localeCompare(alphaB);
+          }
+          return numComparison;
+        });
+
+      setFilteredRows(filteredData);
+    } else {
+      setFilteredRows([]);
+    }
+  }, [loadingLocataireDtails, listLocataires]);
 
   const {
     data: listVersements,
@@ -132,6 +166,20 @@ export default function Versement() {
     error,
     refetch,
   } = useGetVersementsQuery();
+
+  const dispatch = useDispatch();
+  const snackbar = useSelector((state) => state.snackbar);
+
+  const Alert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    dispatch(closeSnackbar());
+  };
 
   return (
     <Box
@@ -144,7 +192,22 @@ export default function Versement() {
       }}
     >
       {/* Ajouter un versement */}
-      <AjouterVersement />
+      <AjouterVersement locataires={filteredRows} />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
       <Typography sx={{ fontWeight: "bold", fontSize: "1.8rem" }}>
         Versements
       </Typography>

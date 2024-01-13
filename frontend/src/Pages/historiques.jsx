@@ -1,6 +1,5 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
-import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
 import MuiAccordion from "@mui/material/Accordion";
 import MuiAccordionSummary from "@mui/material/AccordionSummary";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
@@ -8,7 +7,6 @@ import Typography from "@mui/material/Typography";
 import { useLogQuery } from "../slices/logSlices";
 import CircularProgress from "@mui/material/CircularProgress";
 import { blue, green, red } from "@mui/material/colors";
-import { ExpandCircleDownRounded } from "@mui/icons-material";
 import NavigateNextRoundedIcon from "@mui/icons-material/NavigateNextRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { Box } from "@mui/material";
@@ -56,7 +54,7 @@ export default function Historiques() {
     setExpanded(newExpanded ? panel : false);
   };
 
-  const { data: logLists, isLoading, error, refetch } = useLogQuery();
+  const { data: logLists, isLoading, error } = useLogQuery();
   console.log("logLists", logLists);
 
   const groupedData = logLists
@@ -86,7 +84,7 @@ export default function Historiques() {
       {isLoading ? (
         <CircularProgress />
       ) : error ? (
-        <div>{error?.data.message || error.error}</div>
+        <div>{error?.data?.message || error.error}</div>
       ) : (
         <div>
           {groupedArray.map(({ date, logs }, index) => (

@@ -4,7 +4,7 @@ import Dialog from "@mui/material/Dialog";
 
 import AddVersement from "./AddVersement";
 
-function AddUser() {
+function AjouterVersement({ locataires }) {
   const [open, setOpen] = React.useState(false);
 
   const handleClickOpen = () => {
@@ -28,18 +28,11 @@ function AddUser() {
           onHandleClose={handleClose}
           formType="add"
           setOpen={setOpen}
+          locataires={locataires}
         />
       </Dialog>
     </React.Fragment>
   );
 }
-
-const AjouterVersement = () => {
-  return (
-    <>
-      <AddUser />
-    </>
-  );
-};
 
 export default AjouterVersement;

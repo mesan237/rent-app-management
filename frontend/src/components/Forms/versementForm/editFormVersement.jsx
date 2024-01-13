@@ -7,7 +7,7 @@ import AddVersement from "./AddVersement.jsx";
 import { blue } from "@mui/material/colors";
 import { Avatar } from "@mui/material";
 
-function AddUser({ compoundId, refetch }) {
+function EditFormVersement({ compoundId, refetch }) {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -39,13 +39,5 @@ function AddUser({ compoundId, refetch }) {
     </>
   );
 }
-
-const EditFormVersement = ({ compoundId, refetch }) => {
-  return (
-    <>
-      <AddUser compoundId={compoundId} refetch={refetch} />
-    </>
-  );
-};
 
 export default EditFormVersement;

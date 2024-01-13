@@ -4,8 +4,9 @@ import { apiSlice } from "./apiSlices";
 export const locaTairesApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getLocataires: builder.query({
-      query: () => ({
+      query: (total) => ({
         url: LOCATAIRES_URL,
+        params: total,
       }),
       keepUnusedDataFor: 5,
     }),

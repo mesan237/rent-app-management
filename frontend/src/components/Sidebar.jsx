@@ -1,22 +1,10 @@
 import * as React from "react";
-import {
-  ThemeProvider,
-  createTheme,
-  styled,
-  useTheme,
-} from "@mui/material/styles";
+import { ThemeProvider, createTheme, styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
 import List from "@mui/material/List";
-import CssBaseline from "@mui/material/CssBaseline";
-import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
@@ -24,9 +12,7 @@ import ListItemText from "@mui/material/ListItemText";
 import { categories } from "../utils/constants";
 import { Outlet } from "react-router-dom";
 import Header from "./Header/Header";
-import PropTypes from "prop-types";
-import { Link as RouterLink, MemoryRouter } from "react-router-dom";
-import Link from "@mui/material/Link";
+import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
 import { blue, teal } from "@mui/material/colors";
 
@@ -164,29 +150,7 @@ export default function Sidebar({ setIntendedDestination }) {
           }}
         >
           <DrawerHeader>
-            {/* <Typography
-              variant="h1"
-              noWrap
-              component="div"
-              sx={{
-                fontFamily: "Monoton !important",
-                fontSize: "1.5rem",
-                textTransform: "uppercase",
-                fontWeight: "500",
-                wordSpacing: "10px",
-                letterSpacing: "1px",
-              }}
-            >
-              cite Mockpa
-            </Typography> */}
             <Divider />
-            {/* <IconButton onClick={handleDrawerClose}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton> */}
           </DrawerHeader>
           {/* <Divider /> */}
           <List>
