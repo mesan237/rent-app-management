@@ -133,7 +133,7 @@ const Depenses = () => {
   const {
     data: listDepenses,
     isLoading,
-    error,
+    // error,
     // refetch,
   } = useGetDepensesQuery();
 
@@ -197,13 +197,15 @@ const Depenses = () => {
         sx={{
           display: "flex",
           flexDirection: "column",
-          width: 0.95,
-          mx: "auto",
+          margin: "1rem",
           gap: 1,
         }}
       >
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography sx={{ fontWeight: "bold", fontSize: "1.7rem" }}>
+          <Typography
+            sx={{ fontWeight: "bold", fontSize: "1.7rem" }}
+            color="text.primary"
+          >
             Liste des dépenses
           </Typography>
           <AddExpenses onhandleSubmit={createExpenseHandler} />

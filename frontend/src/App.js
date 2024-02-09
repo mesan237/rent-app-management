@@ -22,8 +22,8 @@ function App() {
   }, [userInfo, intendedDestination, navigate]);
 
   return (
-    <Box className="App">
-      <Box className="app-container">
+    <Box className="App" sx={{ backgroundColor: "secondary.main" }}>
+      <Box className="app-container" sx={{ backgroundColor: "secondary.main" }}>
         <Sidebar setIntendedDestination={setIntendedDestination} />
       </Box>
     </Box>

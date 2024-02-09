@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import dayjs from "dayjs";
 
 import { GridActionsCellItem } from "@mui/x-data-grid";
@@ -10,7 +10,6 @@ import {
   useGetLocataireDetailsQuery,
 } from "../../slices/locatairesApiSlice.js";
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import * as React from "react";
 
 import AddTenant from "./AddTenant.jsx";
 import { blue, pink } from "@mui/material/colors";
@@ -104,7 +103,7 @@ function AddUser({ rowId, refetch }) {
       setNum(locataire.num);
       setTel(locataire.tel);
     }
-  }, [locataire, refetch]);
+  }, [locataire]);
 
   const [open, setOpen] = useState(false);
 

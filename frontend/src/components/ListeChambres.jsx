@@ -79,7 +79,7 @@ const ListeChambres = () => {
   const {
     data: listLocataires,
     isLoading,
-    error,
+    // error,
     refetch,
   } = useGetLocatairesQuery();
 
@@ -133,13 +133,16 @@ const ListeChambres = () => {
 
   // console.log("rows", rows);
   return (
-    <Box sx={{ width: 0.92, mx: "auto" }}>
+    <Box sx={{ margin: "1rem" }}>
       <div
         className="lists"
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
         <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography sx={{ fontWeight: "bold", fontSize: "1.7rem" }}>
+          <Typography
+            sx={{ fontWeight: "bold", fontSize: "1.7rem" }}
+            color="text.primary"
+          >
             Liste des locataires
           </Typography>
           <AddUser refetch={refetch} locataires={listLocataires} />
@@ -157,7 +160,7 @@ const ListeChambres = () => {
             {snackbar.message}
           </Alert>
         </Snackbar>
-        <Box sx={{ height: 400 }}>
+        <Box sx={{ height: 400 }} color="primary">
           {/* <DataGrid
             rowHeight={55}
             rows={rows}
@@ -192,6 +195,7 @@ const ListeChambres = () => {
                 },
               },
             }}
+            color="primary.main"
             autoHeight
             pageSizeOptions={[8]}
             columns={columns}

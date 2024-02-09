@@ -1,18 +1,108 @@
 import React from "react";
-import { styled } from "@mui/material/styles";
+import { createTheme, styled } from "@mui/material/styles";
 import Grid from "@mui/material/Unstable_Grid2";
-import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import { BsCash } from "react-icons/bs";
 import { GiTakeMyMoney, GiReceiveMoney } from "react-icons/gi";
 import { TbDoorEnter } from "react-icons/tb";
-import { PieChart, pieArcLabelClasses } from "@mui/x-charts/PieChart";
+import {
+  PieChart,
+  pieArcLabelClasses,
+  pieArcClasses,
+} from "@mui/x-charts/PieChart";
 import { LineChart } from "@mui/x-charts/LineChart";
 
 import { useGetVersementsQuery } from "../slices/versementSlices";
 import { useGetLocatairesQuery } from "../slices/locatairesApiSlice";
 import { useGetDepensesQuery } from "../slices/depensesApiSlice";
-import { useMemo } from "react";
+
+import { useMemo, useState, useEffect } from "react";
+
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+
+import { DatePicker } from "@mui/x-date-pickers";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import dayjs from "dayjs";
+
+function arraysAreEqual(arr1, arr2) {
+  return (
+    arr1.length === arr2.length &&
+    arr1.every((value, index) => value === arr2[index])
+  );
+}
+
+const generateMonthArray = (sDate, eDate) => {
+  const monthsArray = [];
+
+  const [sMonth, sYear] = sDate.split("-");
+  const [eMonth, eYear] = eDate.split("-");
+  // console.log("...monthYear", sMonth, sYear, eMonth, eYear);
+  let currentYear = sYear;
+  let currentMonth = sMonth;
+
+  while (
+    currentYear < eYear ||
+    (currentYear === eYear && currentMonth <= eMonth)
+  ) {
+    const monthYear = `${currentMonth}-${currentYear}`;
+    const monthName = new Date(
+      `${currentYear}-${currentMonth}-01`
+    ).toLocaleString("en-US", { month: "short" });
+
+    const monthObject = {
+      monthYear,
+      sum: 0,
+      month: monthName,
+    };
+
+    monthsArray.push(monthObject);
+
+    if (currentMonth === 12) {
+      currentMonth = 1;
+      currentYear += 1;
+    } else {
+      currentMonth += 1;
+    }
+  }
+
+  return monthsArray;
+};
+
+const mergeArrays = (secondArray, firstArray) => {
+  const mergedArray = secondArray.map((secondItem) => {
+    const matchingItem = firstArray.find(
+      (firstItem) => firstItem.monthYear === secondItem.monthYear
+    );
+    console.log("matchingItem", matchingItem);
+    if (matchingItem) {
+      // If a match is found, update the sum and other properties
+      return {
+        ...secondItem,
+        sum: matchingItem.sum,
+        month: matchingItem.month,
+      };
+    }
+
+    return secondItem;
+  });
+
+  // Check for any items in the first array that are not present in the second array
+  firstArray.forEach((firstItem) => {
+    const isMissing = mergedArray.every(
+      (mergedItem) => mergedItem.monthYear !== firstItem.monthYear
+    );
+
+    if (isMissing) {
+      // If not found in the second array, push it to the merged array
+      mergedArray.push(firstItem);
+    }
+  });
+  if (mergedArray.length > 12) {
+    return mergedArray.slice(0, 12);
+  }
+  return mergedArray;
+};
 
 function monthsBetweenDates(startDate, endDate) {
   // If endDate is not provided, use the current date
@@ -28,54 +118,6 @@ function monthsBetweenDates(startDate, endDate) {
 
   return months;
 }
-
-const Item = styled(Paper)(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",
-  // background: "linear-gradient(1.15turn, #03b99f, #82fcea)",
-  ...theme.typography.body2,
-  padding: theme.spacing(2),
-  textAlign: "left",
-  color: theme.palette.text.secondary,
-  // color: "white",
-  height: "150px",
-  display: "flex",
-  flexDirection: "row",
-  alignItems: "flex-start",
-  gap: 15,
-  // boxShadow: 3,
-  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.1)",
-  borderRadius: "15px",
-  fontSize: "1.2rem",
-  fontWeight: "bold",
-  alignContent: "space-between",
-}));
-
-const iconStyle = {
-  fontSize: "2.8rem",
-  color: "white",
-  width: "fit-content",
-  borderRadius: "50%",
-  padding: "10px",
-};
-
-const nameCardStyle = {
-  // display: "flex",
-  alignItems: "flex-start",
-  // gap: "12px",
-  fontSize: "0.85rem",
-};
-
-const percentageStyle = {
-  color: "#29d0b1",
-  padding: "2px 8px",
-
-  backgroundColor: "rgb(210, 212, 210 , 0.4)",
-  height: "25px",
-  width: "50px",
-  borderRadius: "15px",
-  border: "1px solid #f2f2f2",
-  textAlign: "center",
-};
 
 const data = [
   { value: -5, label: "Gain" },
@@ -95,13 +137,13 @@ const uData = [
 const xLabels = [
   "Jan",
   "Fev",
-  "March",
+  "Mar",
   "Apr",
   "May",
-  "June",
-  "July",
+  "Jun",
+  "Jul",
   "Aug",
-  "Sept",
+  "Sep",
   "Oct",
   "Nov",
   "Dec",
@@ -112,29 +154,32 @@ const Dashboard = () => {
   const loyerA = 15000;
   const loyerB = 12000;
   const loyerBS = 25000;
-  const startDate = new Date("2023-09-01T00:00:00.000Z");
+
+  const [startDate, setStartDate] = useState(dayjs("2023-09-01"));
+
+  // const startDate = useMemo(() => new Date("2023-09-01T00:00:00.000Z"), []);
 
   // listes des depenses
   const {
     data: listDepenses,
-    isLoading: loadingExpense,
-    error: expenseError,
+    // isLoading: loadingExpense,
+    // error: expenseError,
     // refetch,
   } = useGetDepensesQuery();
 
   // listes des versements
   const {
     data: listVersements,
-    isLoading: loadingVer,
-    error: verError,
+    // isLoading: loadingVer,
+    // error: verError,
     // refetch,
   } = useGetVersementsQuery();
 
   // nombre de locataires par batiments
   const {
     data: totalLocataire,
-    isLoading,
-    error,
+    // isLoading,
+    // error,
   } = useGetLocatairesQuery({ total: true });
 
   // liste des locataires
@@ -191,7 +236,7 @@ const Dashboard = () => {
         entry.historique.forEach((historiqueEntry) => {
           const date = new Date(historiqueEntry.date);
 
-          if (date >= new Date("2023-09-01")) {
+          if (date >= startDate) {
             const monthYearKey = `${date.getMonth() + 1}-${date.getFullYear()}`;
             const monthKey = xLabels[date.getMonth()];
 
@@ -206,6 +251,7 @@ const Dashboard = () => {
                 monthYear: monthYearKey,
                 sum: historiqueEntry.versement,
                 month: monthKey,
+                // mois: date.getMonth(),
               });
             }
           }
@@ -226,13 +272,13 @@ const Dashboard = () => {
     }
 
     return result;
-  }, [listVersements, xLabels]);
+  }, [listVersements, startDate]);
 
   console.log(listVersements && monthlySums);
 
   // manque a gagner
 
-  var amountOfMonth = monthsBetweenDates(new Date("2023-09-01"), new Date());
+  var amountOfMonth = monthsBetweenDates(new Date(startDate), new Date());
 
   const montantAGagner =
     amountOfMonth * loyerB * (totalLocataire?.B - 2) +
@@ -248,7 +294,7 @@ const Dashboard = () => {
     100
   ).toFixed(2);
   const depenses = ((sumMontant / montantAGagner) * 100).toFixed(2);
-  console.log(sumAmountDeposit, sumMontant, manqueAGagner, gains, depenses);
+  // console.log(sumAmountDeposit, sumMontant, manqueAGagner, gains, depenses);
 
   const pieChartDatas = [
     { value: gains, label: "Gain" },
@@ -256,127 +302,142 @@ const Dashboard = () => {
     { value: manqueAGagner, label: "Manque à gagner" },
   ];
 
+  const [columsData, setColumsData] = useState(uData);
+  const [rowData, setRowData] = useState(xLabels);
+
+  useEffect(() => {
+    if (monthlySums) {
+      // const sDate = monthlySums.length && monthlySums[0]?.monthYear;
+      // const eDate =
+      //   monthlySums.length && monthlySums[monthlySums.length - 1]?.monthYear;
+      // const filteredArray = generateMonthArray(eDate, sDate);
+      // const newMerge = mergeArrays(filteredArray, monthlySums);
+      // console.log(newMerge, filteredArray);
+
+      const newColumnsData = monthlySums.map((item) => item.sum);
+      const newRowData = monthlySums.map((item) => item.month);
+
+      if (!arraysAreEqual(columsData, newColumnsData)) {
+        setColumsData(newColumnsData);
+      }
+
+      if (!arraysAreEqual(rowData, newRowData)) {
+        setRowData(newRowData);
+      }
+    }
+  }, [monthlySums, columsData, rowData]);
+  // console.log(rowData, columsData);
   return (
-    <Box
+    <Grid
+      container
       sx={{
-        flexGrow: 1,
-        padding: ".5rem",
+        width: "100%",
+        padding: "1.5rem 2rem 0",
       }}
+      spacing={{ mobile: 1, tablet: 2, laptop: 4 }}
     >
+      <Grid mobile={10} tablet={6} laptop={3}>
+        <Item>
+          <div style={nameCardStyle}>
+            <GiReceiveMoney
+              style={{ ...iconStyle, backgroundColor: "#29d0b1" }}
+            />
+          </div>
+          <div style={{ alignSelf: "center", gap: "3px" }}>
+            <div style={{ fontSize: "0.95rem" }}>Total Entrees</div>
+            <div style={{ margin: "4px auto", fontSize: "1.1rem" }}>
+              {listVersements &&
+                sumAmountDeposit.toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                })}{" "}
+              FCFA
+            </div>
+            <div style={{ fontSize: "0.70rem" }}>
+              <span style={percentageStyle}>+12%</span> de plus que le mois
+              dernier
+            </div>
+          </div>
+        </Item>
+      </Grid>
+      <Grid mobile={10} tablet={6} laptop={3}>
+        <Item>
+          <div style={nameCardStyle}>
+            <BsCash style={{ ...iconStyle, backgroundColor: "#b800d8" }} />
+          </div>
+          <div style={{ alignSelf: "center" }}>
+            <div style={{ fontSize: "0.95rem" }}>Total Depenses</div>
+            <div style={{ margin: "4px auto", fontSize: "1.1rem" }}>
+              {listDepenses &&
+                sumMontant.toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                })}{" "}
+              FCFA
+            </div>
+            <div style={{ fontSize: "0.70rem" }}>
+              <span style={percentageStyle}>-13%</span> de plus que le mois
+              dernier
+            </div>
+          </div>
+        </Item>
+      </Grid>
+      <Grid mobile={10} tablet={6} laptop={3}>
+        <Item>
+          <div style={nameCardStyle}>
+            <TbDoorEnter style={{ ...iconStyle, backgroundColor: "#2e96ff" }} />
+          </div>
+          <div style={{ alignSelf: "center" }}>
+            <div style={{ fontSize: "0.95rem" }}>Total Locataires</div>
+            <div style={{ margin: "4px auto", fontSize: "1.1rem" }}>
+              Batiment A:{" "}
+              <span>{totalLocataire ? totalLocataire.A : "13"} </span> - B:{" "}
+              <span>{totalLocataire ? totalLocataire.B : "7"}</span>
+            </div>
+            <div style={{ fontSize: "0.70rem" }}>
+              <span style={percentageStyle}>+12%</span> de plus que le mois
+              dernier
+            </div>
+          </div>
+        </Item>
+      </Grid>
+      <Grid mobile={10} tablet={6} laptop={3}>
+        <Item>
+          <div style={nameCardStyle}>
+            <GiTakeMyMoney
+              style={{ ...iconStyle, backgroundColor: "#25283b" }}
+            />
+          </div>
+          <div style={{ alignSelf: "center", fontSize: "0.95rem" }}>
+            <div>Total impayés</div>
+            <div style={{ margin: "4px auto", fontSize: "1.1rem" }}>
+              {locataires &&
+                sumDebts.toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                })}{" "}
+              FCFA
+            </div>
+            <div style={{ fontSize: "0.70rem" }}>
+              <span style={percentageStyle}>+1%</span> de reduction des dettes
+            </div>
+          </div>
+        </Item>
+      </Grid>
       <Grid
         container
-        spacing={4}
-        rowSpacing={3}
-        sx={{
-          marginTop: "4px",
-          marginBottom: "4px",
-        }}
+        mobile={24}
+        tablet={24}
+        laptop={12}
+        columns={24}
+        justifyContent="space-around"
+        sx={{ gap: 2 }}
       >
-        <Grid xs={3}>
-          <Item>
-            <div style={nameCardStyle}>
-              <GiReceiveMoney
-                style={{ ...iconStyle, backgroundColor: "#29d0b1" }}
-              />
-            </div>
-            <div style={{ alignSelf: "center" }}>
-              <div style={{ fontSize: "0.85rem" }}>Total Entrees</div>
-              <div style={{ margin: "5px auto" }}>
-                {listVersements &&
-                  sumAmountDeposit.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                  })}{" "}
-                FCFA
-              </div>
-              <div style={{ fontSize: "0.85rem" }}>
-                <span style={percentageStyle}>+12%</span> de plus que le mois
-                dernier
-              </div>
-            </div>
-          </Item>
-        </Grid>
-        <Grid xs={3}>
-          <Item>
-            <div style={nameCardStyle}>
-              <BsCash style={{ ...iconStyle, backgroundColor: "#b800d8" }} />
-            </div>
-            <div style={{ alignSelf: "center" }}>
-              <div style={{ fontSize: "0.85rem" }}>Total Depenses</div>
-              <div style={{ margin: "5px auto" }}>
-                {listDepenses &&
-                  sumMontant.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                  })}{" "}
-                FCFA
-              </div>
-              <div style={{ fontSize: "0.85rem" }}>
-                <span style={percentageStyle}>-13%</span> de plus que le mois
-                dernier
-              </div>
-            </div>
-          </Item>
-        </Grid>
-        <Grid xs={3}>
-          <Item>
-            <div style={nameCardStyle}>
-              <TbDoorEnter
-                style={{ ...iconStyle, backgroundColor: "#2e96ff" }}
-              />
-            </div>
-            <div style={{ alignSelf: "center" }}>
-              <div style={{ fontSize: "0.85rem" }}>Total Locataires</div>
-              <div style={{ margin: "5px auto" }}>
-                Batiment A:{" "}
-                <span>{totalLocataire ? totalLocataire.A : "13"} </span> - B:{" "}
-                <span>{totalLocataire ? totalLocataire.B : "7"}</span>
-              </div>
-              <div style={{ fontSize: "0.85rem" }}>
-                <span style={percentageStyle}>+12%</span> de plus que le mois
-                dernier
-              </div>
-            </div>
-          </Item>
-        </Grid>
-        <Grid xs={3}>
-          <Item>
-            <div style={nameCardStyle}>
-              <GiTakeMyMoney
-                style={{ ...iconStyle, backgroundColor: "#25283b" }}
-              />
-            </div>
-            <div style={{ alignSelf: "center" }}>
-              <div>Total impayés</div>
-              <div style={{ margin: "5px auto" }}>
-                {locataires &&
-                  sumDebts.toLocaleString(undefined, {
-                    minimumFractionDigits: 0,
-                  })}{" "}
-                FCFA
-              </div>
-              <div style={{ fontSize: "0.85rem" }}>
-                <span style={percentageStyle}>+1%</span> de reduction des dettes
-              </div>
-            </div>
-          </Item>
-        </Grid>
-      </Grid>
-      <Box
-        className="charts"
-        sx={{
-          display: "flex",
-          gap: 4,
-        }}
-      >
-        <Box
+        <Grid2
+          mobile={24}
+          tablet={24}
+          laptop={14}
           sx={{
-            // boxShadow: 3,
+            position: "relative",
             borderRadius: 3,
-            p: 2,
-            flex: 1,
-            backgroundColor: "white",
             alignSelf: "flex-end",
-            boxShadow:
-              "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.1)",
           }}
         >
           <LineChart
@@ -386,58 +447,70 @@ const Dashboard = () => {
               top: 30,
               bottom: 80,
             }}
-            // dataset={dataset}
             xAxis={[
               {
-                scaleType: "band",
-                // data: monthlySums
-                //   ? monthlySums.map((item) => item.month)
-                //   : xLabels,
-                data: xLabels,
+                scaleType: "point",
+                data: rowData.length ? rowData : xLabels,
               },
             ]}
             series={[
               {
+                // il y a un soucis d'affichage ici
+                showMark: false,
                 area: true,
-                // data: monthlySums ? monthlySums.map((item) => item.sum) : uData,
-                data: uData,
-                label: "Versement",
+                data: columsData.length ? columsData : uData,
+                label: "Versements",
                 valueFormatter,
               },
             ]}
-            width={550}
+            width={650}
             height={370}
           />
-        </Box>
-        <Box
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DemoContainer components={["DatePicker"]} defaultValue={startDate}>
+              <DatePicker
+                sx={{
+                  position: "absolute",
+                  display: "block",
+                  top: 15,
+                  right: 15,
+                  width: "200px",
+                  mx: 2,
+                }}
+                label="Date de compte"
+                defaultValue={startDate}
+                fullWidth
+                onChange={(newDate) => setStartDate(newDate)}
+              />
+            </DemoContainer>
+          </LocalizationProvider>
+        </Grid2>
+        <Grid2
+          mobile={24}
+          tablet={24}
+          laptop={9}
           sx={{
-            boxShadow:
-              "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.1)",
-            // boxShadow: 3,
             borderRadius: 3,
             p: 2,
-            flex: 1,
-            backgroundColor: "white",
-            // width: "400",
           }}
         >
           <PieChart
-            margin={{ top: 100, bottom: 100, left: -110, right: 100 }}
+            margin={{ top: 0, bottom: 0, left: -100 }}
             slotProps={{
               legend: {
                 direction: "column",
-                position: { vertical: "middle", horizontal: "right" },
-                padding: 90,
+                position: { vertical: "center", horizontal: "right" },
+                padding: 10,
               },
             }}
             series={[
               {
                 data: pieChartDatas ? [...pieChartDatas] : [...data],
                 arcLabel: (item) => `${item.value}%`,
-                innerRadius: 23,
+                innerRadius: 25,
                 outerRadius: 100,
                 paddingAngle: 6,
-                cornerRadius: 7,
+                cornerRadius: 17,
                 startAngle: -180,
                 endAngle: 180,
                 highlightScope: { faded: "global", highlighted: "item" },
@@ -446,22 +519,80 @@ const Dashboard = () => {
                   additionalRadius: -10,
                   color: "gray",
                 },
-                // cx: 100,
-                // cy: 150,
+                // cx: 90,
+                // cy: 100,
               },
             ]}
             sx={{
               [`& .${pieArcLabelClasses.root}`]: {
-                fill: "black",
+                // fill: "black",
                 fontWeight: "bold",
               },
+              // [`& .${pieArcClasses.root}`]: {
+              //   // fill: "black",
+              //   height: "20px",
+              // },
             }}
             {...size}
           />
-        </Box>
-      </Box>
-    </Box>
+        </Grid2>
+      </Grid>
+    </Grid>
   );
+};
+
+const Item = styled(Paper)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#222228" : "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(2),
+  textAlign: "left",
+  color: theme.palette.text.secondary,
+  // color: "white",
+  height: "150px",
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "flex-start",
+  gap: 15,
+  // boxShadow: 3,
+  // boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1), inset 0 0 5px rgba(0, 0, 0, 0.1)",
+  borderRadius: "8px",
+  fontSize: "1.2rem",
+  fontWeight: "bold",
+  alignContent: "space-between",
+}));
+const Grid2 = styled(Grid)(({ theme }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#222228" : "#fff",
+  ...theme.typography.body2,
+  padding: theme.spacing(2),
+  textAlign: "left",
+  color: theme.palette.text.secondary,
+}));
+
+const iconStyle = {
+  fontSize: "2.8rem",
+  color: "white",
+  width: "fit-content",
+  borderRadius: "50%",
+  padding: "10px",
+};
+
+const nameCardStyle = {
+  // display: "flex",
+  alignItems: "flex-start",
+  // gap: "12px",
+  fontSize: "0.85rem",
+};
+
+const percentageStyle = {
+  color: "#29d0b1",
+  padding: "2px 8px",
+
+  backgroundColor: "rgb(210, 212, 210 , 0.4)",
+  height: "25px",
+  width: "50px",
+  borderRadius: "15px",
+  border: "1px solid #f2f2f2",
+  textAlign: "center",
 };
 
 export default Dashboard;

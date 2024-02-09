@@ -21,7 +21,6 @@ import {
   useCreateLocataireMutation,
   useUpdateLocataireMutation,
 } from "../../slices/locatairesApiSlice.js";
-import { useState } from "react";
 
 const AddTenant = ({
   onHandleClose,
@@ -31,14 +30,18 @@ const AddTenant = ({
   refetch,
   locataires,
 }) => {
-  const [createLocataire, { isLoading: createLoading }] =
-    useCreateLocataireMutation();
+  const [
+    createLocataire,
+    // , { isLoading: createLoading }
+  ] = useCreateLocataireMutation();
 
   const dispatch = useDispatch();
 
   // console.log(locataire);
-  const [updateLocataire, { isLoading: loadingUpdate }] =
-    useUpdateLocataireMutation();
+  const [
+    updateLocataire,
+    // , { isLoading: loadingUpdate }
+  ] = useUpdateLocataireMutation();
 
   const handleAddForm = () => {
     const formData = getValues();
@@ -126,7 +129,6 @@ const AddTenant = ({
   const onSubmit = (data) => {
     formType === "edit" ? handleEditForm(data) : handleAddForm(data);
   };
-  const [listLocataires, setListLocataires] = useState([]);
   return (
     <>
       <form onSubmit={handleSubmit(onSubmit)}>

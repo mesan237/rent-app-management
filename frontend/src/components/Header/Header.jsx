@@ -1,20 +1,24 @@
-import React from "react";
+import React, { useContext } from "react";
 import Box from "@mui/material/Box";
-import IconButton from "@mui/material/IconButton";
-import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
-import NotificationsIcon from "@mui/icons-material/Notifications";
+import { Link as RouterLink } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { useLogoutMutation } from "../../slices/usersApiSlice";
 import { logout } from "../../slices/authSlice";
 import { useNavigate } from "react-router-dom";
-import { Avatar, Button, Typography } from "@mui/material";
+import { Avatar, Button, IconButton, Typography } from "@mui/material";
 import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
-import { blue, teal } from "@mui/material/colors";
+import { blue } from "@mui/material/colors";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
+import { ColorModeContext } from "../ToggleColorMoed"; // Import the ColorModeContext
+
 function Header() {
+  const colorMode = useContext(ColorModeContext);
+
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const isMenuOpen = Boolean(anchorEl);
@@ -61,7 +65,9 @@ function Header() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Compte</MenuItem>
+      <MenuItem onClick={handleMenuClose} component={RouterLink} to="/profile">
+        Compte
+      </MenuItem>
       {userInfo ? (
         <MenuItem onClick={handleLogout}>Se deconnecter</MenuItem>
       ) : null}
@@ -81,21 +87,34 @@ function Header() {
           fontWeight: "bold",
           wordSpacing: "10px",
           letterSpacing: "1px",
+          marginRight: "auto",
         }}
+        color="primary.main"
       >
         cite Mockpa
       </Typography>
 
       <Box
         sx={{
+          display: "flex",
           alignSelf: "flex-end",
           marginInlineEnd: "20px",
           paddingBlockStart: "2px",
-          flexDirection: "row",
+          // flexDirection: "row",
           // gap: 2,
         }}
       >
-        <Box sx={{ display: { xs: "none", md: "flex", gap: 3 } }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Typography sx={{ alignSelf: "center" }}>
+            {colorMode.mode === "dark" ? " sombre" : "clair"}
+          </Typography>
+          <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+            {colorMode.mode === "dark" ? (
+              <Brightness7Icon />
+            ) : (
+              <Brightness4Icon color="primary" />
+            )}
+          </IconButton>
           {/* <IconButton
             size="large"
             aria-label="show 17 new notifications"

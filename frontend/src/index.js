@@ -13,11 +13,13 @@ import Depenses from "./Pages/Depenses";
 import LoginForm from "./components/Forms/LoginForm";
 import Historiques from "./Pages/historiques";
 import Versement from "./Pages/Versement";
+import ToggleColorMode from "./components/ToggleColorMoed";
+import UserProfile from "./Pages/userProfile";
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <ToggleColorMode />,
     errorElement: <ErrorPage />,
     children: [
       {
@@ -40,6 +42,10 @@ const router = createBrowserRouter([
       {
         path: "/versement",
         element: <Versement />,
+      },
+      {
+        path: "/profile",
+        element: <UserProfile />,
       },
     ],
   },

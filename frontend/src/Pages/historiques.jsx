@@ -77,8 +77,13 @@ export default function Historiques() {
   console.log(groupedArray);
 
   return (
-    <Box sx={{ p: 4, display: "flex", flexDirection: "column", gap: 4 }}>
-      <Typography sx={{ fontWeight: "bold", fontSize: "1.8rem" }}>
+    <Box
+      sx={{ margin: "1rem", display: "flex", flexDirection: "column", gap: 4 }}
+    >
+      <Typography
+        sx={{ fontWeight: "bold", fontSize: "1.8rem" }}
+        color="text.primary"
+      >
         Historiques
       </Typography>
       {isLoading ? (

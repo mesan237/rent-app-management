@@ -31,6 +31,13 @@ export const versementsApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Versement"],
     }),
+    deleteVersement: builder.mutation({
+      query: (tenantId) => ({
+        url: `${VERSEMENTS_URL}/${tenantId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Versement"],
+    }),
   }),
 });
 
@@ -39,4 +46,5 @@ export const {
   useGetVersementDetailsQuery,
   useUpdateVersementMutation,
   useCreateVersementMutation,
+  useDeleteVersementMutation,
 } = versementsApiSlice;

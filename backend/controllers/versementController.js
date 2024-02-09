@@ -5,6 +5,16 @@ import User from "../models/userModel.js";
 
 export let userId;
 
+function getMonthDifference(startDate, endDate) {
+  const startYear = startDate.getFullYear();
+  const startMonth = startDate.getMonth();
+
+  const endYear = endDate.getFullYear();
+  const endMonth = endDate.getMonth();
+
+  return (endYear - startYear) * 12 + (endMonth - startMonth);
+}
+
 const getVersements = asyncHandler(async (req, res, next) => {
   try {
     const listeVersements = await Versement.find({});
@@ -73,6 +83,7 @@ const getDetailsVersements = asyncHandler(async (req, res) => {
 
 const createVersements = asyncHandler(async (req, res) => {
   const { date, montant, num } = req.body;
+  const dates = [];
 
   const locataire = await Locataire.findOne({ num });
   // res.json(VersementExists);
@@ -80,6 +91,48 @@ const createVersements = asyncHandler(async (req, res) => {
   const versement = await Versement.findOne({
     "montants.locataire": locataire._id,
   });
+  const amount = Number(montant);
+
+  const updateLocataires = async () => {
+    const dateEntry = new Date(locataire.date);
+    const totalAmount = Number(locataire.montant);
+    const monthDifference = getMonthDifference(dateEntry, new Date(Date.now()));
+    const annee = Math.floor(monthDifference / 12);
+
+    const filter = { _id: locataire._id };
+
+    const rentAmount =
+      locataire.num[1] === "A" || locataire.num[2] === "A"
+        ? 15000
+        : locataire.num[1] === "B" || locataire.num[2] === "B"
+        ? 12000
+        : 25000;
+
+    const newDebts =
+      totalAmount + amount - (monthDifference - 2 * annee) * rentAmount;
+    const updateFields = {
+      $set: {
+        months: monthDifference,
+        debts: newDebts,
+        montant: totalAmount + amount,
+      },
+    };
+
+    const result = await Locataire.updateOne(filter, updateFields);
+    dates.push({
+      months: monthDifference,
+      debts: newDebts,
+      totalAmount: totalAmount + amount,
+      // result: result, // Store the result of the update
+    });
+    // Wait for all update promises to resolve
+    // const updateResults = await Promise.all(updatePromises);
+
+    // Output the dates array if needed
+    console.log("dates...", dates);
+    res.json(dates);
+    return result;
+  };
 
   const versementId = versement._id;
   console.log("Versement ID:", versementId);
@@ -93,6 +146,7 @@ const createVersements = asyncHandler(async (req, res) => {
   userId = req.user;
   // console.log(VersementExists);
   try {
+    updateLocataires();
     const updatedVersement = await Versement.findOneAndUpdate(
       { _id: versementId },
       {
@@ -166,7 +220,58 @@ const updateVersement = asyncHandler(async (req, res) => {
   const [montantId, versementId] = req.params.id.split("-");
   // console.log(date);
   userId = req.user;
+  const dates = [];
+  console.log("req.body ...", req.body);
+
+  const updateLocataires = async () => {
+    const versement = await Versement.findById(versementId);
+    const locataireId = versement.montants[0].locataireId;
+    const locataire = await Locataire.findById(locataireId);
+
+    const dateEntry = new Date(locataire.date);
+    const totalAmount = locataire.montant;
+    const monthDifference = getMonthDifference(dateEntry, new Date(Date.now()));
+    const annee = Math.floor(monthDifference / 12);
+
+    const filter = { _id: locataire._id };
+
+    const rentAmount =
+      locataire.num[1] === "A" || locataire.num[2] === "A"
+        ? 15000
+        : locataire.num[1] === "B" || locataire.num[2] === "B"
+        ? 12000
+        : 25000;
+
+    const newDebts =
+      totalAmount + montant - (monthDifference - 2 * annee) * rentAmount;
+    const updateFields = {
+      $set: {
+        months: monthDifference,
+        debts: newDebts,
+      },
+    };
+
+    const result = await Locataire.updateOne(filter, updateFields);
+    dates.push({
+      months: monthDifference,
+      debts: newDebts,
+      totalAmount: totalAmount,
+      result: result, // Store the result of the update
+    });
+
+    // Wait for all update promises to resolve
+    // const updateResults = await Promise.all(updatePromises);
+
+    // Output the dates array if needed
+    console.log("dates...", dates);
+    res.json(dates);
+  };
+  // faire la requette pour recuperer l'ancient montant total
+  // 2 - recalculer ses dettes
+  // 3 - Faire la somme du nouveau montant
+  // 4- ecrire une requette pour sauvegarder les données
   try {
+    // updateLocataires();
     // Use findOneAndUpdate to find the versement and update the specific montant
     const updatedVersement = await Versement.findOneAndUpdate(
       {
@@ -177,7 +282,7 @@ const updateVersement = asyncHandler(async (req, res) => {
         $set: {
           "montants.$.value": montant, // Update the 'value' field of the matched montant
           updatedAt: Date.now(), // Update the updatedAt field of the versement
-          "montants.$.dateVersement": date,
+          // "montants.$.dateVersement": date,
         },
       },
       { new: true } // Return the updated document

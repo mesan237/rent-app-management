@@ -17,7 +17,14 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import EditFormVersement from "../components/Forms/versementForm/editFormVersement";
 
 import { useGetVersementsQuery } from "../slices/versementSlices";
-import { Avatar, CircularProgress, Snackbar } from "@mui/material";
+import {
+  Avatar,
+  CircularProgress,
+  InputBase,
+  Snackbar,
+  alpha,
+  Backdrop,
+} from "@mui/material";
 import { pink } from "@mui/material/colors";
 import AjouterVersement from "../components/Forms/versementForm/addForm";
 import { useGetLocatairesQuery } from "../slices/locatairesApiSlice";
@@ -26,13 +33,67 @@ import { useState } from "react";
 import MuiAlert from "@mui/material/Alert";
 import { useDispatch, useSelector } from "react-redux";
 import { closeSnackbar } from "../slices/snackbar/snackbarSlice";
+import styled from "@emotion/styled";
+import SearchIcon from "@mui/icons-material/Search";
+
+import CustomDialogValidation from "../components/Widgets/CustomDialogValidation";
+import { useDeleteVersementMutation } from "../slices/versementSlices.js";
 
 function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
+  // console.log(row);
+  const [deleteVersement] = useDeleteVersementMutation();
 
+  const [openDelete, setOpenDelete] = React.useState(false);
+
+  const handleClickOpenDelete = () => {
+    setOpenDelete(true);
+  };
+  const handleCloseDelete = () => {
+    setOpenDelete(false);
+  };
+  const [openBackdrop, setOpenBackdrop] = React.useState(false);
+  const handleClosBackdrop = () => {
+    setOpenBackdrop(false);
+  };
+  const handleOpenBackdrop = () => {
+    setOpenBackdrop(true);
+  };
+
+  const deleteVersementHandler = async (versementId) => {
+    try {
+      handleCloseDelete();
+      handleOpenBackdrop();
+      const result = await deleteVersement(versementId);
+      console.log(result);
+      if (result) {
+        handleClosBackdrop();
+      }
+      props.refetch();
+    } catch (error) {
+      console.log(error, " error for deletion");
+    }
+  };
+
+  const [versId, setVersId] = useState("");
   return (
     <React.Fragment>
+      <CustomizedDialogs
+        onHandleDelete={deleteVersementHandler}
+        versId={versId}
+        handleClickOpenDelete={handleClickOpenDelete}
+        handleCloseDelete={handleCloseDelete}
+        openDelete={openDelete}
+      />
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={openBackdrop}
+        onClick={handleClosBackdrop}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell>
           <IconButton
@@ -71,8 +132,12 @@ function Row(props) {
                 </TableHead>
                 <TableBody>
                   {row.historique.map((historyRow, idx) => {
-                    const handleClick = () =>
-                      console.log(`${historyRow._id}-${props.versementId}`);
+                    const handleClick = () => {
+                      const id = `${historyRow._id}-${props.versementId}`;
+                      handleClickOpenDelete();
+                      setVersId(id);
+                      // console.log(versId);
+                    };
                     return (
                       <TableRow key={idx}>
                         <TableCell align="left">
@@ -117,7 +182,7 @@ function Row(props) {
 Row.propTypes = {
   row: PropTypes.shape({
     user: PropTypes.string.isRequired,
-    comments: PropTypes.string.isRequired,
+    // comments: PropTypes.string.isRequired,
     nbrVersement: PropTypes.number.isRequired,
     totalAmount: PropTypes.number.isRequired,
     historique: PropTypes.arrayOf(
@@ -162,8 +227,8 @@ export default function Versement() {
 
   const {
     data: listVersements,
-    isLoading,
-    error,
+    // isLoading,
+    // error,
     refetch,
   } = useGetVersementsQuery();
 
@@ -181,18 +246,32 @@ export default function Versement() {
     dispatch(closeSnackbar());
   };
 
+  const [searchbarState, setSearchbarState] = useState("");
+
+  const [depositList, setDepositList] = useState([]);
+  useEffect(() => {
+    if (listVersements) {
+      const filteredList = listVersements.filter((versement) =>
+        versement.historique[0]?.nameLocataire
+          .toLowerCase()
+          .includes(searchbarState.toLowerCase())
+      );
+      // console.log(filteredList);
+      // Set depositList to the filtered list if it has items, otherwise use the full list
+      setDepositList(filteredList);
+    }
+  }, [listVersements, searchbarState]);
+
   return (
     <Box
       sx={{
-        width: 0.8,
         display: "flex",
         flexDirection: "column",
-        mx: "auto",
-        gap: 4,
+        gap: 2,
+        margin: "1rem",
       }}
     >
       {/* Ajouter un versement */}
-      <AjouterVersement locataires={filteredRows} />
 
       <Snackbar
         open={snackbar.open}
@@ -207,11 +286,34 @@ export default function Versement() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <div
+        style={{
+          display: "flex",
+          gap: "4px",
+          flexWrap: "wrap",
+        }}
+      >
+        <Typography
+          sx={{ fontWeight: "bold", fontSize: "1.8rem" }}
+          color="text.primary"
+        >
+          Versements
+        </Typography>
 
-      <Typography sx={{ fontWeight: "bold", fontSize: "1.8rem" }}>
-        Versements
-      </Typography>
-      <TableContainer component={Paper}>
+        <Search>
+          <SearchIconWrapper>
+            <SearchIcon />
+          </SearchIconWrapper>
+          <StyledInputBase
+            placeholder="Recercher un locataire..."
+            inputProps={{ "aria-label": "search" }}
+            onChange={(e) => setSearchbarState(e.target.value)}
+          />
+        </Search>
+        <AjouterVersement locataires={filteredRows} refetch={refetch} />
+      </div>
+
+      <TableContainer component={Paper} color="primary">
         <Table aria-label="collapsible table">
           <TableHead>
             <TableRow>
@@ -231,10 +333,10 @@ export default function Versement() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {!listVersements ? (
+            {!depositList ? (
               <CircularProgress />
             ) : (
-              listVersements.map((row, index) => (
+              depositList.map((row, index) => (
                 <Row
                   key={index}
                   row={row}
@@ -249,3 +351,69 @@ export default function Versement() {
     </Box>
   );
 }
+
+function CustomizedDialogs({
+  onHandleDelete,
+  versId,
+  openDelete,
+  handleCloseDelete,
+}) {
+  return (
+    <React.Fragment>
+      <CustomDialogValidation
+        open={openDelete}
+        onClose={handleCloseDelete}
+        title="SUPPRESSION"
+        onCloseButtonClick={() => onHandleDelete(versId)}
+        btnColor="error"
+      >
+        <Typography gutterBottom>
+          Êtes-vous sûr(e) de vouloir supprimer ce versement ?
+        </Typography>
+        <Typography gutterBottom>Cette suppression est définitive</Typography>
+      </CustomDialogValidation>
+    </React.Fragment>
+  );
+}
+
+const StyledInputBase = styled(InputBase)(({ theme }) => ({
+  color: "inherit",
+  width: "100%",
+  "& .MuiInputBase-input": {
+    padding: theme.spacing(1, 1, 1, 0),
+    // vertical padding + font size from searchIcon
+    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+    transition: theme.transitions.create("width"),
+    [theme.breakpoints.up("sm")]: {
+      width: "12ch",
+      "&:focus": {
+        width: "20ch",
+      },
+    },
+  },
+}));
+
+const Search = styled("div")(({ theme }) => ({
+  position: "relative",
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: alpha(theme.palette.common.white, 0.15),
+  "&:hover": {
+    backgroundColor: alpha(theme.palette.common.white, 0.25),
+  },
+  marginLeft: "auto",
+  width: "300px",
+  [theme.breakpoints.up("sm")]: {
+    marginLeft: theme.spacing(1),
+    width: "auto",
+  },
+}));
+
+const SearchIconWrapper = styled("div")(({ theme }) => ({
+  padding: theme.spacing(0, 2),
+  height: "100%",
+  position: "absolute",
+  pointerEvents: "none",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));

@@ -18,6 +18,7 @@ import { openSnackbar } from "../../../slices/snackbar/snackbarSlice";
 import {
   useUpdateVersementMutation,
   useCreateVersementMutation,
+  useGetVersementsQuery,
 } from "../../../slices/versementSlices";
 import { useDispatch } from "react-redux";
 
@@ -25,15 +26,20 @@ const AddVersement = ({
   onHandleClose,
   formType,
   compoundId,
-  refetch,
+  // refetch,
   locataires,
 }) => {
   const [createVersement, { isLoading: loadingCreation }] =
     useCreateVersementMutation();
+  const {
+    data: listVersements,
+    // isLoading,
+    // error,
+    refetch,
+  } = useGetVersementsQuery();
 
   const dispatch = useDispatch();
-  // console.log("liste versements", listVersements);
-  console.log("locataires", locataires, "refetch", refetch);
+  // console.log("locataires", locataires, "refetch", refetch);
 
   const [updateVersement, { isLoading: loadingUpdate }] =
     useUpdateVersementMutation();
@@ -41,7 +47,7 @@ const AddVersement = ({
   const handleAddForm = () => {
     const formData = getValues();
     const versementData = { ...formData };
-    console.log(versementData);
+    // console.log(versementData);
     try {
       const result = createVersement(versementData);
       if (result.error) {
@@ -59,6 +65,8 @@ const AddVersement = ({
           })
         );
         refetch();
+        console.log(listVersements);
+        // refetch();
       }
     } catch (error) {
       dispatch(

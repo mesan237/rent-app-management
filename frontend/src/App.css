@@ -1,10 +1,11 @@
 @import url("https://fonts.googleapis.com/css2?family=Nunito&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
 * {
   box-sizing: border-box;
   margin: 0;
   /* font-family: "Nunito", sans-serif; */
-  font-family: "Quicksand" !important;
+  font-family: "Raleway", "Quicksand" !important;
+  /* font-weight: 700; */
 }
 
 html,
@@ -16,8 +17,12 @@ body {
 .App {
   display: flex;
   flex-direction: column;
-  /* text-align: center; */
-  /* background-color: #f0f1f3; */
-  background-color: hsl(177, 41%, 98%);
   height: 100%;
+}
+.white-mode {
+  background-color: hsl(177, 41%, 98%);
+}
+
+.dark-mode {
+  background-color: rgb(21 21 24);
 }

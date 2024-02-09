@@ -6,6 +6,7 @@ import {
   updateVersement,
   getVersements,
   getDetailsVersements,
+  deleteVersements,
 } from "../controllers/versementController.js";
 import { protect, admin } from "../middleware/authMiddleware.js";
 
@@ -16,6 +17,7 @@ router
 router
   .route("/:id")
   .get(protect, getVersementById)
-  .put(protect, updateVersement);
+  .put(protect, updateVersement)
+  .delete(protect, deleteVersements);
 
 export default router;

@@ -14,23 +14,14 @@ import { Outlet } from "react-router-dom";
 import Header from "./Header/Header";
 import { Link as RouterLink } from "react-router-dom";
 import { useState } from "react";
-import { blue, teal } from "@mui/material/colors";
+import { IconButton, Toolbar } from "@mui/material";
+import { useTheme } from "@emotion/react";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
+import MenuIcon from "@mui/icons-material/Menu";
 
 const drawerWidth = 240;
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      // main: "#00bfa5",
-      main: blue[500],
-      // contrastText: "#E9DB5D",
-    },
-    secondary: {
-      main: blue[400],
-      // contrastText: "#242105",
-    },
-  },
-});
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
@@ -54,6 +45,8 @@ const closedMixin = (theme) => ({
 });
 
 const DrawerHeader = styled("div")(({ theme }) => ({
+  // borderRight:
+  //   theme.palette.mode === "dark" ? "12px solid #121212" : "10px solid #fff",
   display: "flex",
   alignItems: "center",
   justifyContent: "flex-end",
@@ -70,6 +63,8 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
+  backgroundImage: "none",
+  backgroundColor: theme.palette.mode === "dark" ? "#19191d" : "#fff",
   ...(open && {
     marginLeft: drawerWidth,
     width: `calc(100% - ${drawerWidth}px)`,
@@ -83,6 +78,9 @@ const AppBar = styled(MuiAppBar, {
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
+  backgroundColor: theme.palette.mode === "dark" ? "#121212" : "#fff",
+  borderRight:
+    theme.palette.mode === "dark" ? "1px solid #121212" : "1px solid #fff",
   width: drawerWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
@@ -112,107 +110,137 @@ export default function Sidebar({ setIntendedDestination }) {
     setSelectedCategory(categoryName);
   }
 
+  const theme = useTheme();
+  const [openD, setOpenD] = React.useState(false);
+
+  const handleDrawerOpen = () => {
+    setOpenD(true);
+  };
+
+  const handleDrawerClose = () => {
+    setOpenD(false);
+  };
+
   return (
-    <ThemeProvider theme={theme}>
-      <Box
+    // <ThemeProvider theme={theme}>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-around",
+      }}
+    >
+      <AppBar
+        open={openD}
         sx={{
-          display: "flex",
-          // flexDirection: "column",
-          justifyContent: "space-around",
+          // backgroundColor: "#fff",
+          boxShadow: 0,
         }}
+        color="secondary"
       >
-        {/*content */}
-        {/* <CssBaseline /> */}
-        <AppBar
-          open={open}
+        <Toolbar
           sx={{
-            backgroundColor: "#fff",
-            boxShadow: 0,
-            color: teal[600],
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
+            padding: "0 1rem",
           }}
         >
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+            sx={{
+              marginRight: 5,
+              ...(openD && { display: "none" }),
+            }}
+          >
+            <MenuIcon />
+          </IconButton>
           <Header />
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          open={open}
-          PaperProps={{
-            sx: {
-              backgroundColor: "#fff",
-              color: "#000",
-              fontWeight: "bold",
-              borderRight: "1px solid #fff",
-              px: 2.5,
-            },
-          }}
-        >
-          <DrawerHeader>
-            <Divider />
-          </DrawerHeader>
-          {/* <Divider /> */}
-          <List>
-            {categories.map((category) => (
-              <ListItem
-                className={` ${
-                  selectedCategory === category.name && "selected-category"
-                }`}
-                key={category.name}
-                disablePadding
-                // {selectedCategory === category.name && sx={{...selectCategory}}}
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        variant="permanent"
+        open={openD}
+        PaperProps={{
+          sx: {
+            fontWeight: "bold",
+            px: openD ? 1.5 : 1,
+          },
+        }}
+      >
+        <DrawerHeader>
+          <IconButton onClick={handleDrawerClose}>
+            {theme.direction === "rtl" ? (
+              <ChevronRightIcon />
+            ) : (
+              <ChevronLeftIcon />
+            )}
+          </IconButton>
+        </DrawerHeader>
+        <Divider />
+        {/* <Divider /> */}
+        <List>
+          {categories.map((category) => (
+            <ListItem
+              className={` ${
+                selectedCategory === category.name && "selected-category"
+              }`}
+              key={category.name}
+              disablePadding
+              // {selectedCategory === category.name && sx={{...selectCategory}}}
+              sx={{
+                display: "block",
+                fontWeight: "bold",
+                borderRadius: "10px",
+                backgroundColor:
+                  selectedCategory === category.name ? "primary.main" : null,
+                color:
+                  selectedCategory === category.name ? "primary" : "secondary",
+                transition: "transform 0.5s ease-in-out",
+              }}
+            >
+              <ListItemButton
+                onClick={() => {
+                  handleActiveButton(category.name);
+                  setIntendedDestination(category.link);
+                }}
+                component={RouterLink}
+                to={category.link}
                 sx={{
-                  display: "block",
-                  fontWeight: "bold",
-                  borderRadius: "10px",
-                  backgroundColor:
-                    selectedCategory === category.name ? "primary.main" : null,
-                  color: selectedCategory === category.name ? "white" : null,
-                  transition: "transform 0.5s ease-in-out",
+                  minHeight: 48,
+                  justifyContent: openD ? "initial" : "center",
+                  px: 2.5,
+                  py: 1.6,
                 }}
               >
-                <ListItemButton
-                  onClick={() => {
-                    handleActiveButton(category.name);
-                    setIntendedDestination(category.link);
-                  }}
-                  component={RouterLink}
-                  to={category.link}
+                <ListItemIcon
                   sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    py: 1.6,
-                    // my: 2,
+                    minWidth: 0,
+                    mr: openD ? 4 : "auto",
+                    justifyContent: "center",
+                    color:
+                      selectedCategory === category.name
+                        ? "primary"
+                        : "secondary",
                   }}
                 >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : "auto",
-                      justifyContent: "center",
-                      color:
-                        selectedCategory === category.name ? "#fff" : "#000",
-                      // #009688
-                    }}
-                  >
-                    {category.icon}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={category.name}
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Drawer>
-        <Box component="main" sx={{ flexGrow: 1 }}>
-          <DrawerHeader />
-          <Outlet />
-        </Box>
+                  {category.icon}
+                </ListItemIcon>
+                <ListItemText
+                  primary={category.name}
+                  sx={{ opacity: openD ? 1 : 0 }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: 1 }}>
+        <DrawerHeader />
+        <Outlet />
       </Box>
-    </ThemeProvider>
+    </Box>
+    // </ThemeProvider>
   );
 }
