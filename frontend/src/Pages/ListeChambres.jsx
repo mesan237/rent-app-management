@@ -10,8 +10,8 @@ import Box from "@mui/material/Box";
 import { useGetLocatairesQuery } from "../slices/locatairesApiSlice";
 // import CircularProgress from "@mui/material/CircularProgress";
 
-import AddUser from "./Forms/AddUser";
-import EditLocataire from "./Forms/editForm";
+import AddUser from "../components/Forms/AddUser";
+import EditLocataire from "../components/Forms/editForm";
 
 import { GridToolbar } from "@mui/x-data-grid";
 import Snackbar from "@mui/material/Snackbar";

@@ -15,18 +15,18 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 
 import {
-  useUpdatedepenseMutation,
+  useUpdateDepenseMutation,
   useGetDepenseDetailsQuery,
 } from "../../../slices/depensesApiSlice.js";
 import { Avatar, CircularProgress } from "@mui/material";
-import { blue } from "@mui/material/colors";
+
+import { useForm, Controller } from "react-hook-form";
 
 // const {data: locataire, isLoading: detailsLoading} =useGetLocataireDetailsQuery()
 
-function AddUser({ rowId }) {
+function EditExpenses({ rowId, refetch }) {
   const [designation, setDesignation] = useState("");
   const [categorie, setCategorie] = useState("");
   const [batiment, setBatiment] = useState("");
@@ -39,10 +39,10 @@ function AddUser({ rowId }) {
     data: depense,
     isLoading: loadingDetails,
     error,
-    refetch,
+    // refetch,
   } = useGetDepenseDetailsQuery(rowId);
-  const [updateLocataire, { isLoading: loadingUpdate }] =
-    useUpdatedepenseMutation();
+  const [updateDepense, { isLoading: loadingUpdate }] =
+    useUpdateDepenseMutation();
 
   useEffect(() => {
     if (depense) {
@@ -61,34 +61,35 @@ function AddUser({ rowId }) {
   const handleClickOpen = () => {
     setOpen(true);
   };
-  const handleChangeBatiment = (event) => {
-    setBatiment(event.target.value);
-  };
 
   const handleEditExpense = async () => {
+    const formData = getValues();
+    const editedFform = { ...formData, _id: depenseId };
     if (depense) {
-      const updatedLocataire = {
-        designation,
-        categorie,
-        batiment,
-        date,
-        _id: depenseId,
-        montant,
-        comments,
-      };
-      const result = await updateLocataire(updatedLocataire);
-      console.log(result);
-
-      // refetch();
-
-      setOpen(false);
+      // console.log(editedFform);
+      const result = await updateDepense(editedFform);
+      if (result) {
+        setOpen(false);
+        refetch();
+      }
     } else {
-      alert("Errorrrrrr!!!!!");
+      console.log("Errorrrrrr!!!!!");
     }
   };
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm();
+
+  const onSubmit = (data) => {
+    handleEditExpense(data);
   };
 
   return (
@@ -105,7 +106,7 @@ function AddUser({ rowId }) {
         color="inherit"
       />
       <Dialog open={open} onClose={handleClose}>
-        <form onSubmit={handleEditExpense}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <DialogTitle>Modifier une Depense</DialogTitle>
           {loadingUpdate && <CircularProgress />}
 
@@ -113,77 +114,130 @@ function AddUser({ rowId }) {
             <CircularProgress />
           ) : (
             <DialogContent>
-              <TextField
-                autoFocus
-                margin="normal"
-                id="designation"
-                value={designation}
-                label="Designation"
-                onChange={(e) => setDesignation(e.target.value)}
-                type="text"
-                fullWidth
-                variant="standard"
-              />
-              <TextField
-                autoFocus
-                margin="normal"
-                id="montant"
-                value={montant}
-                label="Montant"
-                onChange={(e) => setMontant(e.target.value)}
-                type="number"
-                fullWidth
-                variant="standard"
-              />
-              <TextField
-                autoFocus
-                id="categorie"
-                margin="normal"
-                label="categorie"
-                value={categorie}
-                type="text"
-                onChange={(e) => setCategorie(e.target.value)}
-                fullWidth
-                variant="standard"
-              />
-
-              <TextField
-                id="outlined-select-currency"
-                margin="normal"
-                select
-                label="Batiment"
-                value={batiment}
-                onChange={handleChangeBatiment}
-
-                // helperText="Please select the room"
-              >
-                {[
-                  { value: "A", label: "A" },
-                  { value: "B", label: "B" },
-                ].map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DemoContainer components={["DateTimePicker"]}>
-                  <DateTimePicker
-                    label="Basic date time picker"
-                    value={date}
-                    onChange={(newDate) => setDate(newDate)}
+              <Controller
+                name="designation"
+                control={control}
+                defaultValue={designation}
+                rules={{ required: "Le champ designation est requis" }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    error={!!errors.designation}
+                    helperText={
+                      errors.designation && errors.designation.message
+                    }
+                    autoFocus
+                    margin="normal"
+                    id="designation"
+                    type="text"
+                    fullWidth
+                    variant="standard"
                   />
-                </DemoContainer>
-              </LocalizationProvider>
-              <TextField
-                id="outlined-multiline-flexible"
-                label="Commentaire"
-                margin="normal"
-                fullWidth
-                value={comments}
-                onChange={(e) => setComments(e.target.value)}
-                multiline
-                maxRows={4}
+                )}
+              />
+              <Controller
+                name="montant"
+                control={control}
+                defaultValue={montant}
+                rules={{ required: "Le montant est necessaire" }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    error={!!errors.montant}
+                    helperText={errors.montant && errors.montant.message}
+                    autoFocus
+                    margin="normal"
+                    id="montant"
+                    label="Montant"
+                    type="number"
+                    fullWidth
+                    variant="standard"
+                  />
+                )}
+              />
+              <Controller
+                name="categorie"
+                control={control}
+                defaultValue={categorie}
+                rules={{ required: "La categorie est necessaire" }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    error={!!errors.categorie}
+                    helperText={errors.categorie && errors.categorie.message}
+                    autoFocus
+                    margin="normal"
+                    id="categorie"
+                    label="categorie"
+                    type="text"
+                    fullWidth
+                    variant="standard"
+                  />
+                )}
+              />
+
+              <Controller
+                name="batiment"
+                control={control}
+                defaultValue={batiment}
+                rules={{ required: "Batiment is required" }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    error={!!errors.batiment}
+                    helperText={errors.batiment && errors.batiment.message}
+                    id="outlined-numero-chambre"
+                    select
+                    label="batiment"
+                    margin="normal"
+                  >
+                    {[
+                      { value: "A", label: "A" },
+                      { value: "B", label: "B" },
+                    ].map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+
+              <Controller
+                name="date"
+                control={control}
+                defaultValue={dayjs(date)}
+                rules={{ required: "La date du versement est necessaire" }}
+                render={({ field }) => (
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={["DateTimePicker"]}>
+                      <DateTimePicker
+                        {...field}
+                        label="Date du versement"
+                        fullWidth
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                )}
+              />
+
+              <Controller
+                name="comments"
+                control={control}
+                defaultValue={comments}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    error={!!errors.comments}
+                    helperText={errors.comments && errors.comments.message}
+                    id="outlined-multiline-flexible"
+                    label="Commentaire"
+                    fullWidth
+                    multiline
+                    margin="normal"
+                    maxRows={4}
+                  />
+                )}
               />
             </DialogContent>
           )}
@@ -196,13 +250,5 @@ function AddUser({ rowId }) {
     </>
   );
 }
-
-const EditExpenses = ({ rowId }) => {
-  return (
-    <>
-      <AddUser rowId={rowId} />
-    </>
-  );
-};
 
 export default EditExpenses;

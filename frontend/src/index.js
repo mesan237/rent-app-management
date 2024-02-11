@@ -8,7 +8,7 @@ import "./index.css";
 import App from "./App";
 import Dashboard from "./Pages/Dashboard";
 import ErrorPage from "./ErrorPage";
-import ListeChambres from "./components/ListeChambres";
+import ListeChambres from "./Pages/ListeChambres";
 import Depenses from "./Pages/Depenses";
 import LoginForm from "./components/Forms/LoginForm";
 import Historiques from "./Pages/historiques";

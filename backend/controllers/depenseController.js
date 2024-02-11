@@ -62,7 +62,18 @@ const getDepenseById = asyncHandler(async (req, res) => {
   }
 });
 
-const deleteDepenses = asyncHandler(async (req, res) => {});
+const deleteDepenses = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedItem = await Depense.findByIdAndDelete(id);
+    if (!deletedItem) {
+      return res.status(404).send("expense not found");
+    }
+    res.status(200).send("expense deleted successfully");
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+});
 
 const modifierDepenses = asyncHandler(async (req, res) => {
   const { designation, date, batiment, categorie, montant, comments } =
@@ -88,4 +99,10 @@ const modifierDepenses = asyncHandler(async (req, res) => {
   }
 });
 
-export { getDepenses, createDepenses, modifierDepenses, getDepenseById };
+export {
+  getDepenses,
+  createDepenses,
+  modifierDepenses,
+  getDepenseById,
+  deleteDepenses,
+};

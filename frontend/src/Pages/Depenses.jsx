@@ -9,11 +9,7 @@ import {
   GridActionsCellItem,
 } from "@mui/x-data-grid";
 import Box from "@mui/material/Box";
-import {
-  useCreateDepenseMutation,
-  useGetDepensesQuery,
-} from "../slices/depensesApiSlice.js";
-import CircularProgress from "@mui/material/CircularProgress";
+import { useGetDepensesQuery } from "../slices/depensesApiSlice.js";
 import { pink, teal } from "@mui/material/colors";
 
 import DeleteIcon from "@mui/icons-material/DeleteOutlined";
@@ -27,6 +23,9 @@ import MuiAlert from "@mui/material/Alert";
 
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { Typography } from "@mui/material";
+import { Backdrop, CircularProgress } from "@mui/material";
+import { useDeleteDepenseMutation } from "../slices/depensesApiSlice.js";
+import DeleteDialog from "../components/Forms/DeleteComponent.jsx";
 
 const theme = createTheme({
   palette: {
@@ -63,93 +62,111 @@ function CustomPagination(props) {
   return <GridPagination ActionsComponent={Pagination} {...props} />;
 }
 
-const columns = [
-  {
-    field: "designation",
-    headerClassName: "super-app-theme--header",
-    headerName: "📝 Designation",
-    width: 250,
-  },
-  {
-    field: "date",
-    headerName: "📅 Date entrée",
-    headerClassName: "super-app-theme--header",
-    type: "date",
-    valueGetter: ({ value }) => value && new Date(value),
-    width: 150,
-  },
-  {
-    field: "batiment",
-    headerClassName: "super-app-theme--header",
-    headerName: "🏛️ Batiment",
-    width: 100,
-    align: "center",
-  },
-  {
-    field: "categorie",
-    headerClassName: "super-app-theme--header",
-    headerName: "Categorie",
-    width: 150,
-  },
-  {
-    field: "montant",
-    headerClassName: "super-app-theme--header",
-    headerName: "💰 Montant",
-    type: "number",
-    width: 150,
-  },
-  {
-    field: "comments",
-    headerClassName: "super-app-theme--header",
-    headerName: "♒ Commentaires",
-    width: 250,
-  },
-  {
-    field: "actions",
-    type: "actions",
-    headerClassName: "super-app-theme--header",
-    headerName: "Actions",
-    width: 150,
-    cellClassName: "actions",
-    getActions: ({ id }) => {
-      return [
-        <EditExpenses rowId={id} />,
-        <GridActionsCellItem
-          icon={
-            <Avatar variant="rounded" sx={{ bgcolor: "#fce4e4" }}>
-              <DeleteIcon sx={{ color: pink[500] }} />
-            </Avatar>
-          }
-          label="Delete"
-          onClick={() => console.log(id, "for delete purpose")}
-          color="inherit"
-        />,
-      ];
-    },
-  },
-];
-
 const Depenses = () => {
+  const columns = [
+    {
+      field: "designation",
+      headerClassName: "super-app-theme--header",
+      headerName: "📝 Designation",
+      width: 250,
+    },
+    {
+      field: "date",
+      headerName: "📅 Date entrée",
+      headerClassName: "super-app-theme--header",
+      type: "date",
+      valueGetter: ({ value }) => value && new Date(value),
+      width: 150,
+    },
+    {
+      field: "batiment",
+      headerClassName: "super-app-theme--header",
+      headerName: "🏛️ Batiment",
+      width: 100,
+      align: "center",
+    },
+    {
+      field: "categorie",
+      headerClassName: "super-app-theme--header",
+      headerName: "Categorie",
+      width: 150,
+    },
+    {
+      field: "montant",
+      headerClassName: "super-app-theme--header",
+      headerName: "💰 Montant",
+      type: "number",
+      width: 150,
+    },
+    {
+      field: "comments",
+      headerClassName: "super-app-theme--header",
+      headerName: "♒ Commentaires",
+      width: 250,
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerClassName: "super-app-theme--header",
+      headerName: "Actions",
+      width: 150,
+      cellClassName: "actions",
+      getActions: ({ id }) => {
+        return [
+          <EditExpenses rowId={id} refetch={refetch} />,
+          <DeleteDialog
+            rowId={id}
+            onHandleDelete={deleteDepenseHandler}
+            handleClickOpenDelete={handleClickOpenDelete}
+            handleCloseDelete={handleCloseDelete}
+            openDelete={openDelete}
+            message="Êtes-vous sûr(e) de vouloir supprimer cette depense ?"
+          />,
+        ];
+      },
+    },
+  ];
+
+  const [deleteDepense] = useDeleteDepenseMutation();
+
+  const [openBackdrop, setOpenBackdrop] = React.useState(false);
+  const handleClosBackdrop = () => {
+    setOpenBackdrop(false);
+  };
+  const handleOpenBackdrop = () => {
+    setOpenBackdrop(true);
+  };
+  const [openDelete, setOpenDelete] = React.useState(false);
+
+  const handleClickOpenDelete = () => {
+    setOpenDelete(true);
+  };
+  const handleCloseDelete = () => {
+    setOpenDelete(false);
+  };
+
+  const deleteDepenseHandler = async (depenseId) => {
+    try {
+      handleCloseDelete();
+      handleOpenBackdrop();
+      const result = await deleteDepense(depenseId);
+      console.log(result);
+      if (result) {
+        handleClosBackdrop();
+      }
+      refetch();
+    } catch (error) {
+      console.log(error, " error for deletion");
+    }
+  };
+
   const {
     data: listDepenses,
     isLoading,
     // error,
-    // refetch,
+    refetch,
   } = useGetDepensesQuery();
 
-  const [createDepense, { isLoading: createLoading }] =
-    useCreateDepenseMutation();
-
-  const createExpenseHandler = async (depense) => {
-    if (window.confirm("Etes vous sure de vouloir ajouter une depense ? ")) {
-      try {
-        await createDepense(depense);
-        // refetch();
-      } catch (error) {
-        console.log(error);
-      }
-    }
-  };
   console.log(useGetDepensesQuery());
   // Create a copy of the array with modifications
   const rows = !listDepenses
@@ -185,7 +202,7 @@ const Depenses = () => {
   return (
     <>
       {/* <ThemeProvider theme={theme}> */}
-      {createLoading && <CircularProgress />}
+      {isLoading && <CircularProgress />}
       {/* {isLoading ? (
         <h2 style={{ display: "flex" }}>
           <CircularProgress />
@@ -193,6 +210,15 @@ const Depenses = () => {
       ) : error ? (
         <div>{error?.data.message || error.error}</div>
       ) : ( */}
+
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={openBackdrop}
+        onClick={handleClosBackdrop}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+
       <Box
         sx={{
           display: "flex",
@@ -208,7 +234,7 @@ const Depenses = () => {
           >
             Liste des dépenses
           </Typography>
-          <AddExpenses onhandleSubmit={createExpenseHandler} />
+          <AddExpenses refetch={refetch} />
         </Box>
         <Box sx={{ height: "80vh" }}>
           <DataGrid

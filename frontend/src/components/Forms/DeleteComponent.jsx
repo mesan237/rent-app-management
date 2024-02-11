@@ -1,54 +1,40 @@
 import * as React from "react";
-import Button from "@mui/joy/Button";
-import Divider from "@mui/joy/Divider";
-import DialogTitle from "@mui/joy/DialogTitle";
-import DialogContent from "@mui/joy/DialogContent";
-import DialogActions from "@mui/joy/DialogActions";
-import Modal from "@mui/joy/Modal";
-import ModalDialog from "@mui/joy/ModalDialog";
-import DeleteForever from "@mui/icons-material/DeleteForever";
-import WarningRoundedIcon from "@mui/icons-material/WarningRounded";
+import { Avatar, Typography } from "@mui/material";
+import CustomDialogValidation from "../Widgets/CustomDialogValidation";
+import { GridActionsCellItem } from "@mui/x-data-grid";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import { pink } from "@mui/material/colors";
 
-export default function AlertDialogModal() {
-  const [open, setOpen] = React.useState(false);
+export default function DeleteDialog({
+  onHandleDelete,
+  rowId,
+  openDelete,
+  handleClickOpenDelete,
+  handleCloseDelete,
+  message,
+}) {
   return (
     <React.Fragment>
-      <Button
-        variant="outlined"
-        color="danger"
-        endDecorator={<DeleteForever />}
-        onClick={() => setOpen(true)}
+      <GridActionsCellItem
+        icon={
+          <Avatar variant="rounded" sx={{ bgcolor: "#fce4e4" }}>
+            <DeleteIcon sx={{ color: pink[500] }} />
+          </Avatar>
+        }
+        label="Delete"
+        onClick={handleClickOpenDelete}
+        color="inherit"
+      />
+      <CustomDialogValidation
+        open={openDelete}
+        onClose={handleCloseDelete}
+        title="SUPPRESSION"
+        onCloseButtonClick={() => onHandleDelete(rowId)}
+        btnColor="error"
       >
-        Discard
-      </Button>
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <ModalDialog variant="outlined" role="alertdialog">
-          <DialogTitle>
-            <WarningRoundedIcon />
-            Confirmation
-          </DialogTitle>
-          <Divider />
-          <DialogContent>
-            Are you sure you want to discard all of your notes?
-          </DialogContent>
-          <DialogActions>
-            <Button
-              variant="solid"
-              color="danger"
-              onClick={() => setOpen(false)}
-            >
-              Discard notes
-            </Button>
-            <Button
-              variant="plain"
-              color="neutral"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
-            </Button>
-          </DialogActions>
-        </ModalDialog>
-      </Modal>
+        <Typography gutterBottom>{message}</Typography>
+        <Typography gutterBottom>Cette suppression est définitive</Typography>
+      </CustomDialogValidation>
     </React.Fragment>
   );
 }

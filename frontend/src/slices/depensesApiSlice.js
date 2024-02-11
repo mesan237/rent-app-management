@@ -23,11 +23,18 @@ export const depensesApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Depense"],
     }),
-    updatedepense: builder.mutation({
+    updateDepense: builder.mutation({
       query: (data) => ({
         url: `${DEPENSES_URL}/${data._id}`,
         method: "PUT",
         body: data,
+      }),
+      invalidatesTags: ["Depense"],
+    }),
+    deleteDepense: builder.mutation({
+      query: (expenseId) => ({
+        url: `${DEPENSES_URL}/${expenseId}`,
+        method: "DELETE",
       }),
       invalidatesTags: ["Depense"],
     }),
@@ -38,5 +45,6 @@ export const {
   useGetDepensesQuery,
   useCreateDepenseMutation,
   useGetDepenseDetailsQuery,
-  useUpdatedepenseMutation,
+  useUpdateDepenseMutation,
+  useDeleteDepenseMutation,
 } = depensesApiSlice;

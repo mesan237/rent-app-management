@@ -69,8 +69,9 @@ function Row(props) {
       console.log(result);
       if (result) {
         handleClosBackdrop();
+        props.refetch();
+        props.refetchLoc();
       }
-      props.refetch();
     } catch (error) {
       console.log(error, " error for deletion");
     }
@@ -182,7 +183,6 @@ function Row(props) {
 Row.propTypes = {
   row: PropTypes.shape({
     user: PropTypes.string.isRequired,
-    // comments: PropTypes.string.isRequired,
     nbrVersement: PropTypes.number.isRequired,
     totalAmount: PropTypes.number.isRequired,
     historique: PropTypes.arrayOf(
@@ -196,8 +196,11 @@ Row.propTypes = {
 
 export default function Versement() {
   const [filteredRows, setFilteredRows] = useState([]);
-  const { data: listLocataires, isLoading: loadingLocataireDtails } =
-    useGetLocatairesQuery();
+  const {
+    data: listLocataires,
+    isLoading: loadingLocataireDtails,
+    refetch: refetchLoc,
+  } = useGetLocatairesQuery();
 
   useEffect(() => {
     // Use useEffect to update filteredRows when listLocataires changes
@@ -342,6 +345,7 @@ export default function Versement() {
                   row={row}
                   versementId={row._id}
                   refetch={refetch}
+                  refetchLoc={refetchLoc}
                 />
               ))
             )}
