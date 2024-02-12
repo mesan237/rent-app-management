@@ -7,7 +7,7 @@ import AddVersement from "./AddVersement.jsx";
 import { blue } from "@mui/material/colors";
 import { Avatar } from "@mui/material";
 
-function EditFormVersement({ compoundId, refetch }) {
+function EditFormVersement({ compoundId, refetch, versList }) {
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -34,6 +34,7 @@ function EditFormVersement({ compoundId, refetch }) {
           formType="edit"
           compoundId={compoundId}
           refetch={refetch}
+          versList={versList}
         />
       </Dialog>
     </>

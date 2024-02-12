@@ -26,7 +26,7 @@ const AddVersement = ({
   onHandleClose,
   formType,
   compoundId,
-  // refetch,
+  refetch,
   locataires,
 }) => {
   const [createVersement, { isLoading: loadingCreation }] =
@@ -35,7 +35,7 @@ const AddVersement = ({
     data: listVersements,
     // isLoading,
     // error,
-    refetch,
+    // refetch,
   } = useGetVersementsQuery();
 
   const dispatch = useDispatch();
@@ -58,6 +58,7 @@ const AddVersement = ({
           })
         );
       } else {
+        refetch();
         dispatch(
           openSnackbar({
             message: "Le versement a été créé avec succes!",
@@ -65,8 +66,7 @@ const AddVersement = ({
           })
         );
         refetch();
-        console.log(listVersements);
-        // refetch();
+        // console.log(versList);
       }
     } catch (error) {
       dispatch(

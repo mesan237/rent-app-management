@@ -64,9 +64,9 @@ function Row(props) {
   const deleteVersementHandler = async (versementId) => {
     try {
       handleCloseDelete();
-      handleOpenBackdrop();
+      // handleOpenBackdrop();
       const result = await deleteVersement(versementId);
-      console.log(result);
+      console.log("result ", result);
       if (result) {
         handleClosBackdrop();
         props.refetch();
@@ -233,7 +233,9 @@ export default function Versement() {
     // isLoading,
     // error,
     refetch,
-  } = useGetVersementsQuery();
+  } = useGetVersementsQuery(undefined, {
+    pollingInterval: 3000, // Polling every 5 seconds
+  });
 
   const dispatch = useDispatch();
   const snackbar = useSelector((state) => state.snackbar);
