@@ -9,22 +9,22 @@ import { useNavigate } from "react-router-dom";
 function App() {
   const navigate = useNavigate();
   const { userInfo } = useSelector((state) => state.login);
+  const destination = useSelector((state) => state.navigation.destination);
 
-  const [intendedDestination, setIntendedDestination] = useState(null);
-  // console.log("redirect");
+  console.log(destination);
 
   useEffect(() => {
     if (userInfo) {
-      navigate(intendedDestination || "/dashboard");
+      navigate(destination || "/dashboard");
     } else {
       navigate("/login");
     }
-  }, [userInfo, intendedDestination, navigate]);
+  }, [userInfo, destination, navigate]);
 
   return (
     <Box className="App" sx={{ backgroundColor: "secondary.main" }}>
       <Box className="app-container" sx={{ backgroundColor: "secondary.main" }}>
-        <Sidebar setIntendedDestination={setIntendedDestination} />
+        <Sidebar />
       </Box>
     </Box>
   );

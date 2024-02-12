@@ -20,6 +20,8 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
 import MenuIcon from "@mui/icons-material/Menu";
+import { useDispatch } from "react-redux";
+import { intendedDestination } from "../slices/navigationSlices/NavigationSlices";
 
 const drawerWidth = 240;
 
@@ -95,7 +97,8 @@ const Drawer = styled(MuiDrawer, {
   }),
 }));
 
-export default function Sidebar({ setIntendedDestination }) {
+export default function Sidebar() {
+  const dispatch = useDispatch();
   const open = true;
   const [selectedCategory, setSelectedCategory] = useState(
     localStorage.getItem("selectedCategory") || "Dashboard"
@@ -203,7 +206,7 @@ export default function Sidebar({ setIntendedDestination }) {
               <ListItemButton
                 onClick={() => {
                   handleActiveButton(category.name);
-                  setIntendedDestination(category.link);
+                  dispatch(intendedDestination({ destination: category.link }));
                 }}
                 component={RouterLink}
                 to={category.link}

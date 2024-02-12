@@ -15,6 +15,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { ColorModeContext } from "../ToggleColorMoed"; // Import the ColorModeContext
+import { intendedDestination } from "../../slices/navigationSlices/NavigationSlices";
 
 function Header() {
   const colorMode = useContext(ColorModeContext);
@@ -45,6 +46,15 @@ function Header() {
       console.log(error);
     }
   };
+  const handleProfile = async () => {
+    handleMenuClose();
+    try {
+      intendedDestination({ destination: "/profile" });
+      handleMenuClose();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const { userInfo } = useSelector((state) => state.login);
   // console.log(userInfo.name);
@@ -65,8 +75,8 @@ function Header() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose} component={RouterLink} to="/profile">
-        Compte
+      <MenuItem onClick={handleProfile} component={RouterLink} to="/profile">
+        Profile
       </MenuItem>
       {userInfo ? (
         <MenuItem onClick={handleLogout}>Se deconnecter</MenuItem>
@@ -100,8 +110,6 @@ function Header() {
           alignSelf: "flex-end",
           marginInlineEnd: "20px",
           paddingBlockStart: "2px",
-          // flexDirection: "row",
-          // gap: 2,
         }}
       >
         <Box sx={{ display: "flex", gap: 1 }}>
@@ -115,15 +123,6 @@ function Header() {
               <Brightness4Icon color="primary" />
             )}
           </IconButton>
-          {/* <IconButton
-            size="large"
-            aria-label="show 17 new notifications"
-            color="primary"
-          >
-            <Badge badgeContent={17} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton> */}
           <Button
             id="demo-customized-button"
             // aria-controls={open ? 'demo-customized-menu' : undefined}
