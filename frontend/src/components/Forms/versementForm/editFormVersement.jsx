@@ -34,7 +34,6 @@ function EditFormVersement({ compoundId, refetch, versList }) {
           formType="edit"
           compoundId={compoundId}
           refetch={refetch}
-          versList={versList}
         />
       </Dialog>
     </>

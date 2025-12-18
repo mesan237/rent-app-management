@@ -171,7 +171,7 @@ const Dashboard = () => {
   const {
     data: listVersements,
     // isLoading: loadingVer,
-    // error: verError,
+    error: versementError,
     // refetch,
   } = useGetVersementsQuery();
 
@@ -179,7 +179,7 @@ const Dashboard = () => {
   const {
     data: totalLocataire,
     // isLoading,
-    // error,
+    error: errorLocataire,
   } = useGetLocatairesQuery({ total: true });
 
   // liste des locataires
@@ -274,7 +274,7 @@ const Dashboard = () => {
     return result;
   }, [listVersements, startDate]);
 
-  console.log(listVersements && monthlySums);
+  // console.log(listVersements && monthlySums);
 
   // manque a gagner
 
@@ -346,7 +346,7 @@ const Dashboard = () => {
           <div style={{ alignSelf: "center", gap: "3px" }}>
             <div style={{ fontSize: "0.95rem" }}>Total Entrees</div>
             <div style={{ margin: "4px auto", fontSize: "1.1rem" }}>
-              {listVersements &&
+              {listVersements?.length > 0 &&
                 sumAmountDeposit.toLocaleString(undefined, {
                   minimumFractionDigits: 0,
                 })}{" "}
@@ -367,7 +367,7 @@ const Dashboard = () => {
           <div style={{ alignSelf: "center" }}>
             <div style={{ fontSize: "0.95rem" }}>Total Depenses</div>
             <div style={{ margin: "4px auto", fontSize: "1.1rem" }}>
-              {listDepenses &&
+              {listDepenses?.length > 0 &&
                 sumMontant.toLocaleString(undefined, {
                   minimumFractionDigits: 0,
                 })}{" "}
@@ -409,7 +409,7 @@ const Dashboard = () => {
           <div style={{ alignSelf: "center", fontSize: "0.95rem" }}>
             <div>Total impayés</div>
             <div style={{ margin: "4px auto", fontSize: "1.1rem" }}>
-              {locataires &&
+              {locataires?.length > 0 &&
                 sumDebts.toLocaleString(undefined, {
                   minimumFractionDigits: 0,
                 })}{" "}
